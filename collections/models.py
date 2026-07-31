@@ -23,6 +23,14 @@ class GameCollection(models.Model):
         default=True,
     )
 
+    views = models.PositiveIntegerField(
+        default=0,
+    )
+
+    likes = models.PositiveIntegerField(
+        default=0,
+    )
+
     created_at = models.DateTimeField(
         auto_now_add=True,
     )
@@ -36,6 +44,9 @@ class GameCollection(models.Model):
         through="CollectionGame",
         related_name="collections",
     )
+
+    class Meta:
+        ordering = ["-created_at"]
 
     def __str__(self):
         return self.title
@@ -72,7 +83,13 @@ class CollectionGame(models.Model):
 
     class Meta:
         ordering = ["order"]
-        unique_together = ("collection", "game")
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["collection", "game"],
+                name="unique_game_in_collection",
+            )
+        ]
 
     def __str__(self):
         return f"{self.collection} - {self.game}"
@@ -82,6 +99,7 @@ class RecommendationVote(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
+        related_name="recommendation_votes",
     )
 
     collection_game = models.ForeignKey(
@@ -97,4 +115,9 @@ class RecommendationVote(models.Model):
     )
 
     class Meta:
-        unique_together = ("user", "collection_game")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "collection_game"],
+                name="unique_recommendation_vote",
+            )
+        ]

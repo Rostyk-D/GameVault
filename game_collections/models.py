@@ -8,7 +8,7 @@ class GameCollection(models.Model):
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="collections",
+        related_name="game_collections",
     )
 
     title = models.CharField(
@@ -42,7 +42,7 @@ class GameCollection(models.Model):
     games = models.ManyToManyField(
         Game,
         through="CollectionGame",
-        related_name="collections",
+        related_name="game_collections",
     )
 
     class Meta:

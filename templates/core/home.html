@@ -1,1 +1,160 @@
 {% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}
+  Home | GameVault
+{% endblock %}
+
+{% block extra_css %}
+  <link
+      rel="stylesheet"
+      href="{% static 'css/home.css' %}"
+  >
+{% endblock %}
+
+{% block content %}
+  <section class="hero-section text-center p-5 mb-5 rounded">
+    <h1 class="display-3 fw-bold">
+      🎮 GameVault
+    </h1>
+    <p class="fs-4 mt-3">
+      Discover games through player-created collections.
+    </p>
+    <p class="text-secondary">
+      Create your own collections and explain:
+      <br>
+      <strong>"Why should I play this?"</strong>
+    </p>
+    <div class="mt-4">
+      <a href="#" class="btn btn-primary btn-lg me-2">
+        Explore Collections
+      </a>
+      <a href="#" class="btn btn-outline-light btn-lg">
+        Create Collection
+      </a>
+    </div>
+  </section>
+
+
+  <section class="mb-5">
+    <h2 class="section-title">
+      🔥 Featured Collections
+    </h2>
+    <div class="row g-4">
+      {% for collection in featured_collections %}
+        <div class="col-lg-4 col-md-6">
+          <div class="card game-card h-100">
+            <div class="card-body">
+              <h4>
+                {{ collection.title }}
+              </h4>
+              <p class="text-secondary">
+                {{ collection.description|truncatewords:18 }}
+              </p>
+              <div class="small text-muted">
+                👤 {{ collection.owner.username }}
+                <br>
+                🎮 {{ collection.games.count }} games
+              </div>
+              <a href="#"
+                 class="btn btn-primary mt-3 w-100">
+                View Collection
+              </a>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p>No collections yet.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+
+  <section class="mb-5">
+    <h2 class="section-title">
+      🆕 Latest Collections
+    </h2>
+    <div class="row g-4">
+      {% for collection in latest_collections %}
+        <div class="col-lg-4">
+          <div class="card game-card">
+            <div class="card-body">
+              <h5>
+                {{ collection.title }}
+              </h5>
+              <p class="text-secondary">
+                {{ collection.description|truncatewords:12 }}
+              </p>
+              <span class="badge bg-dark">
+{{ collection.created_at|date:"M d, Y" }}
+</span>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p>No collections yet.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+
+  <section class="mb-5">
+    <h2 class="section-title">
+      🎮 Most Used Games
+    </h2>
+    <div class="row g-4">
+      {% for game in most_used_games %}
+        <div class="col-xl-3 col-lg-4 col-md-6">
+          <div class="card game-card h-100">
+            {% if game.cover %}
+              <img
+                  src="{{ game.cover.url }}"
+                  class="card-img-top game-cover"
+                  alt="{{ game.title }}"
+              >
+            {% endif %}
+            <div class="card-body">
+              <h5>
+                {{ game.title }}
+              </h5>
+              <p class="text-secondary">
+                Added to
+                <strong>
+                  {{ game.collection_count }}
+                </strong>
+                collections
+              </p>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p>No Game yet.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+
+  <section class="mb-5">
+    <h2 class="section-title">
+      👑 Top Contributors
+    </h2>
+    <div class="leaderboard">
+      {% for user in top_users %}
+        <div class="leader-item">
+          <div>
+            <strong>
+              {{ user.username }}
+            </strong>
+          </div>
+          <div>
+            ⭐ {{ user.reputation }}
+          </div>
+        </div>
+      {% empty %}
+        <p>No User yet.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+
+{% endblock %}

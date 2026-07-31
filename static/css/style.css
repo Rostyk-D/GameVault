@@ -1,0 +1,52 @@
+:root {
+
+    --bg-main: #0f1115;
+    --bg-card: #171a21;
+
+    --text-main: #ffffff;
+    --text-secondary: #9aa4b2;
+
+    --border-color: #2a2f3a;
+
+    --accent-color: #0d6efd;
+
+    --border-radius: 0.75rem;
+
+    --transition: 0.3s;
+
+}
+
+
+body {
+
+    background-color: var(--bg-main);
+
+    color: var(--text-main);
+
+}
+
+
+
+.card {
+
+    background-color: var(--bg-card);
+
+    border-color: var(--border-color);
+
+}
+
+
+
+.text-secondary {
+
+    color: var(--text-secondary) !important;
+
+}
+
+
+
+.btn {
+
+    border-radius: var(--border-radius);
+
+}

@@ -1,2 +1,13 @@
+# Main library
+Django
 Pillow
+
+# For corect style code
 flake8
+
+# Secret keys
+django-environ
+
+# Styles
+django-crispy-forms
+crispy-bootstrap5

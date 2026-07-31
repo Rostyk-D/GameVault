@@ -1,0 +1,74 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}
+  Login | GameVault
+{% endblock %}
+
+{% block extra_css %}
+  <link
+      rel="stylesheet"
+      href="{% static 'css/users.css' %}"
+  >
+{% endblock %}
+
+{% block content %}
+  <div class="auth-container">
+    <div class="auth-card">
+
+      <h2 class="auth-title">
+        Login account
+      </h2>
+
+      <form method="post">
+        {% csrf_token %}
+
+        {% if form.errors %}
+          <div class="alert alert-danger">
+            Please fix the errors below.
+          </div>
+        {% endif %}
+
+        <div class="mb-3">
+          <label class="form-label">
+            Username
+          </label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <div class="text-danger">
+              {{ form.username.errors }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">
+            Password
+          </label>
+          {{ form.password }}
+          {% if form.password.errors %}
+            <div class="text-danger">
+              {{ form.password.errors }}
+            </div>
+          {% endif %}
+        </div>
+
+        <button
+            type="submit"
+            class="btn btn-primary w-100 btn-auth"
+        >
+          Login account
+        </button>
+
+      </form>
+
+      <p class="auth-footer">
+        Don't have an account?
+        <a href="{% url 'register' %}">
+          Create account
+        </a>
+      </p>
+
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}
+  {{ profile_user.username }} | GameVault
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-card">
+  <div class="profile-header">
+    <div class="profile-info">
+      <h1>
+        {{ profile_user.username }}
+      </h1>
+
+      <p>
+        <strong>
+          Steam ID:
+        </strong>
+        {{ profile_user.steam_id|default:"Not connected" }}
+      </p>
+
+      <p>
+        <strong>
+          Reputation:
+        </strong>
+        {{ profile_user.reputation }}
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="profile-card mt-4">
+  <div class="section-header">
+    <h3>
+      My Collections
+    </h3>
+  </div>
+
+  {% if profile_user.gamecollection_set.all %}
+    <div class="collections-grid">
+      {% for collection in profile_user.gamecollection_set.all %}
+        <div class="collection-card">
+          <a href="#">
+            <div class="collection-cover">
+              {% if collection.cover %}
+                <img
+                    src="{{ collection.cover.url }}"
+                    alt="{{ collection.name }}"
+                >
+              {% else %}
+                <img
+                    src="{% static 'images/default-collection.svg' %}"
+                    alt="Collection"
+                >
+              {% endif %}
+
+              <div class="collection-overlay">
+                Open
+              </div>
+            </div>
+          </a>
+
+          <h5>
+            {{ collection.name }}
+          </h5>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="empty-text">
+      You don't have any collections yet.
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

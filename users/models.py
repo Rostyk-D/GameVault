@@ -10,12 +10,6 @@ class User(AbstractUser):
         unique=True,
     )
 
-    avatar = models.ImageField(
-        upload_to="avatars/",
-        blank=True,
-        null=True,
-    )
-
     reputation = models.PositiveIntegerField(
         default=0,
     )

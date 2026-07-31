@@ -6,75 +6,180 @@
 {% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+  <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="profile-card">
-  <div class="profile-header">
-    <div class="profile-info">
-      <h1>
-        {{ profile_user.username }}
-      </h1>
 
-      <p>
-        <strong>
-          Steam ID:
-        </strong>
-        {{ profile_user.steam_id|default:"Not connected" }}
-      </p>
+  <div class="profile-card">
 
-      <p>
-        <strong>
-          Reputation:
-        </strong>
-        {{ profile_user.reputation }}
-      </p>
-    </div>
-  </div>
-</div>
+    {% if edit_mode %}
 
-<div class="profile-card mt-4">
-  <div class="section-header">
-    <h3>
-      My Collections
-    </h3>
-  </div>
+      <h2 class="profile-title">
+        Edit profile
+      </h2>
 
-  {% if profile_user.gamecollection_set.all %}
-    <div class="collections-grid">
-      {% for collection in profile_user.gamecollection_set.all %}
-        <div class="collection-card">
-          <a href="#">
-            <div class="collection-cover">
-              {% if collection.cover %}
-                <img
-                    src="{{ collection.cover.url }}"
-                    alt="{{ collection.name }}"
-                >
-              {% else %}
-                <img
-                    src="{% static 'images/default-collection.svg' %}"
-                    alt="Collection"
-                >
-              {% endif %}
+      <form method="post">
+        {% csrf_token %}
 
-              <div class="collection-overlay">
-                Open
+        {% for field in form %}
+          <div class="mb-3">
+
+            <label class="form-label">
+              {{ field.label }}
+            </label>
+
+            {{ field }}
+
+            {% if field.errors %}
+              <div class="text-danger">
+                {{ field.errors }}
               </div>
-            </div>
-          </a>
+            {% endif %}
 
-          <h5>
-            {{ collection.name }}
-          </h5>
+          </div>
+        {% endfor %}
+
+        <button class="btn btn-primary">
+          Save changes
+        </button>
+
+        <a href="{% url 'users:profile' profile_user.pk %}"
+           class="btn btn-secondary">
+          Cancel
+        </a>
+
+      </form>
+
+    {% else %}
+
+      <div class="profile-header">
+
+        <div class="profile-info">
+
+          <h1>
+            {{ profile_user.username }}
+          </h1>
+
+          <p>
+            <strong>
+              Email:
+            </strong>
+            {{ profile_user.email|default:"Not specified" }}
+          </p>
+
+          <p>
+            <strong>
+              Gender:
+            </strong>
+            {{ profile_user.gender|default:"Not specified" }}
+          </p>
+
+          <p>
+            <strong>
+              Age:
+            </strong>
+            {{ profile_user.age|default:"Not specified" }}
+          </p>
+
+          <p>
+            <strong>
+              Favorite game:
+            </strong>
+            {{ profile_user.favorite_game|default:"Not specified" }}
+          </p>
+
+          <p>
+            <strong>
+              Steam ID:
+            </strong>
+            {{ profile_user.steam_id|default:"Not connected" }}
+          </p>
+
+          <p>
+            <strong>
+              Reputation:
+            </strong>
+            {{ profile_user.reputation }}
+          </p>
+
+          {% if request.user == profile_user %}
+            <a href="{% url 'users:profile-edit' profile_user.pk %}"
+               class="btn btn-primary mt-3">
+              Edit profile
+            </a>
+          {% endif %}
+
         </div>
-      {% endfor %}
+
+      </div>
+
+
+      </div>
+
+
+      <div class="profile-card mt-4">
+
+      <h3>
+        My Collections
+      </h3>
+
+      {% if profile_user.gamecollection_set.all %}
+
+        <div class="collections-grid">
+
+          {% for collection in profile_user.gamecollection_set.all %}
+
+            <div class="collection-card">
+
+              <a href="#">
+
+                <div class="collection-cover">
+
+                  {% if collection.cover %}
+
+                    <img
+                        src="{{ collection.cover.url }}"
+                        alt="{{ collection.name }}"
+                    >
+
+                  {% else %}
+
+                    <img
+                        src="{% static 'images/default-collection.svg' %}"
+                        alt="Collection"
+                    >
+
+                  {% endif %}
+
+                  <div class="collection-overlay">
+                    Open
+                  </div>
+
+                </div>
+
+              </a>
+
+              <h5>
+                {{ collection.name }}
+              </h5>
+
+            </div>
+
+          {% endfor %}
+
+        </div>
+
+      {% else %}
+
+        <p class="empty-text">
+          You don't have any collections yet.
+        </p>
+
+      {% endif %}
+
+    {% endif %}
+
     </div>
-  {% else %}
-    <p class="empty-text">
-      You don't have any collections yet.
-    </p>
-  {% endif %}
-</div>
+
 {% endblock %}

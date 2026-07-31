@@ -1,6 +1,7 @@
 # Main library
 Django
 Pillow
+django-autocomplete-light
 
 # For corect style code
 flake8

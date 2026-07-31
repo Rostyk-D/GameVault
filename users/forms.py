@@ -1,10 +1,13 @@
 import re
 
+from dal import autocomplete
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import get_user_model
 
-from users.models import User
+from games.models import Game
 
+User = get_user_model()
 
 class UserLoginForm(AuthenticationForm):
     username = forms.CharField(
@@ -84,3 +87,68 @@ class UserRegistrationForm(UserCreationForm):
             )
 
         return password
+
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = (
+            "email",
+            "gender",
+            "age",
+            "favorite_game",
+            "steam_id",
+        )
+
+        widgets = {
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "example@gmail.com",
+                }
+            ),
+
+            "gender": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+
+            "age": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Your age",
+                }
+            ),
+
+            "favorite_game": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+
+            "steam_id": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Your Steam ID",
+                }
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["favorite_game"].queryset = Game.objects.all()
+
+        for field in self.fields.values():
+            field.help_text = ""
+
+    def clean_age(self):
+        age = self.cleaned_data.get("age")
+
+        if age is not None and (age < 12 or age > 99):
+            raise forms.ValidationError(
+                "Age must be between 12 and 99."
+            )
+
+        return age

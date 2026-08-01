@@ -1,0 +1,92 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}
+  Games | GameVault
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/games.css' %}">
+  <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
+{% endblock %}
+
+{% block content %}
+
+  <h1 class="page-title">
+    Games
+  </h1>
+
+  <form method="get" class="mb-4">
+    <input
+        type="text"
+        name="q"
+        value="{{ request.GET.q }}"
+        class="form-control"
+        placeholder="Search games..."
+    >
+  </form>
+
+  <div class="games-grid">
+
+    {% for game in games %}
+
+      <a
+          href="{% url 'games:game-detail' game.pk %}"
+          class="game-card"
+      >
+
+        <div class="game-cover">
+
+          {% if game.cover %}
+            <img
+                src="{{ game.cover }}"
+                alt="{{ game.title }}"
+            >
+          {% else %}
+            <img
+                src="{% static 'images/default-game.png' %}"
+                alt="Game"
+            >
+          {% endif %}
+
+        </div>
+
+        <div class="game-body">
+
+          <h5>
+            {{ game.title }}
+          </h5>
+
+          <p>
+            {{ game.developer }}
+          </p>
+
+          <div class="genre-list">
+
+            {% for genre in game.genres.all %}
+
+              <span class="genre-badge">
+          {{ genre.name }}
+        </span>
+
+            {% endfor %}
+
+          </div>
+
+        </div>
+
+      </a>
+
+    {% empty %}
+
+      <div class="empty-games">
+        No games available.
+      </div>
+
+    {% endfor %}
+
+  </div>
+
+  {% include "includes/pagination.html" %}
+
+{% endblock %}

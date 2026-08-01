@@ -33,14 +33,11 @@ class GameAutocomplete(
 ):
 
     def get_queryset(self):
-
         qs = Game.objects.all()
-
         if self.q:
             qs = qs.filter(
                 title__icontains=self.q
             )
-
         return qs
 
 

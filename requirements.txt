@@ -2,6 +2,8 @@
 Django
 Pillow
 django-autocomplete-light
+requests
+python-dotenv
 
 # For corect style code
 flake8

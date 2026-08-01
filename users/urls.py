@@ -34,8 +34,8 @@ urlpatterns = [
     ),
 
     path(
-        "game-autocomplete/",
+        "games-autocomplete/",
         GameAutocomplete.as_view(),
-        name="game-autocomplete",
+        name="games-autocomplete",
     ),
 ]

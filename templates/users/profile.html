@@ -1,185 +1,186 @@
 {% extends "base/base.html" %}
 {% load static %}
-
 {% block title %}
   {{ profile_user.username }} | GameVault
 {% endblock %}
-
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+  <link rel="stylesheet" href="{% static 'css/games.css' %}">
 {% endblock %}
-
 {% block content %}
-
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
   <div class="profile-card">
-
     {% if edit_mode %}
-
       <h2 class="profile-title">
         Edit profile
       </h2>
-
       <form method="post">
         {% csrf_token %}
-
         {% for field in form %}
           <div class="mb-3">
-
             <label class="form-label">
               {{ field.label }}
             </label>
-
             {{ field }}
-
             {% if field.errors %}
               <div class="text-danger">
                 {{ field.errors }}
               </div>
             {% endif %}
-
           </div>
         {% endfor %}
-
         <button class="btn btn-primary">
           Save changes
         </button>
-
-        <a href="{% url 'users:profile' profile_user.pk %}"
-           class="btn btn-secondary">
+        <a href="{% url 'users:profile' profile_user.pk %}" class="btn btn-secondary">
           Cancel
         </a>
-
       </form>
-
     {% else %}
-
       <div class="profile-header">
-
         <div class="profile-info">
-
           <h1>
             {{ profile_user.username }}
           </h1>
-
           <p>
-            <strong>
-              Email:
-            </strong>
+            <strong>Email:</strong>
             {{ profile_user.email|default:"Not specified" }}
           </p>
-
           <p>
-            <strong>
-              Gender:
-            </strong>
-            {{ profile_user.gender|default:"Not specified" }}
+            <strong>Gender:</strong>
+            {{ profile_user.get_gender_display|default:"Not specified" }}
           </p>
-
           <p>
-            <strong>
-              Age:
-            </strong>
+            <strong>Age:</strong>
             {{ profile_user.age|default:"Not specified" }}
           </p>
-
           <p>
-            <strong>
-              Favorite game:
-            </strong>
+            <strong>Favorite game:</strong>
             {{ profile_user.favorite_game|default:"Not specified" }}
           </p>
-
           <p>
-            <strong>
-              Steam ID:
-            </strong>
+            <strong>Steam ID:</strong>
             {{ profile_user.steam_id|default:"Not connected" }}
           </p>
-
           <p>
-            <strong>
-              Reputation:
-            </strong>
+            <strong>Library sync:</strong>
+            {{ profile_user.steam_sync_status }}
+
+            {% if profile_user.steam_sync_status == "syncing" %}
+              ({{ profile_user.steam_sync_progress }} games processed)
+            {% endif %}
+
+          </p>
+          {% if profile_user.steam_last_sync %}
+            <p>
+              <strong>Last sync:</strong>
+              {{ profile_user.steam_last_sync }}
+            </p>
+          {% endif %}
+          <p>
+            <strong>Reputation:</strong>
             {{ profile_user.reputation }}
           </p>
-
           {% if request.user == profile_user %}
-            <a href="{% url 'users:profile-edit' profile_user.pk %}"
-               class="btn btn-primary mt-3">
+            <a href="{% url 'users:profile-edit' profile_user.pk %}" class="btn btn-primary mt-3">
               Edit profile
             </a>
           {% endif %}
-
         </div>
-
       </div>
-
-
-      </div>
-
-
-      <div class="profile-card mt-4">
-
-      <h3>
-        My Collections
-      </h3>
-
-      {% if profile_user.gamecollection_set.all %}
-
-        <div class="collections-grid">
-
-          {% for collection in profile_user.gamecollection_set.all %}
-
-            <div class="collection-card">
-
-              <a href="#">
-
-                <div class="collection-cover">
-
-                  {% if collection.cover %}
-
-                    <img
-                        src="{{ collection.cover.url }}"
-                        alt="{{ collection.name }}"
-                    >
-
-                  {% else %}
-
-                    <img
-                        src="{% static 'images/default-collection.svg' %}"
-                        alt="Collection"
-                    >
-
-                  {% endif %}
-
-                  <div class="collection-overlay">
-                    Open
-                  </div>
-
-                </div>
-
-              </a>
-
-              <h5>
-                {{ collection.name }}
-              </h5>
-
-            </div>
-
-          {% endfor %}
-
-        </div>
-
-      {% else %}
-
-        <p class="empty-text">
-          You don't have any collections yet.
-        </p>
-
-      {% endif %}
-
     {% endif %}
-
+  </div>
+  <div class="profile-card mt-4">
+    <h3>
+      My Collections
+    </h3>
+    {% if profile_user.gamecollection_set.all %}
+      <div class="collections-list">
+        {% for collection in profile_user.gamecollection_set.all %}
+          <div class="collection-item">
+            <h5>
+              {{ collection.name }}
+            </h5>
+            <p>
+              {{ collection.description|default:"No description" }}
+            </p>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-text">
+        You don't have any collections yet.
+      </p>
+    {% endif %}
+  </div>
+  <div class="profile-card mt-4">
+    <div class="library-header">
+      <h3>
+        Steam Library
+      </h3>
+      {% if request.user == profile_user and profile_user.steam_id %}
+        {% if profile_user.steam_sync_status == "completed" or profile_user.steam_sync_status == "error" %}
+          <form method="post" action="{% url 'users:steam-update' pk=profile_user.pk %}">
+            {% csrf_token %}
+            <button class="btn btn-primary">
+              Update library
+            </button>
+          </form>
+        {% else %}
+          <button class="btn btn-secondary" disabled>
+            Updating...
+          </button>
+        {% endif %}
+      {% endif %}
     </div>
-
+    {% if not profile_user.steam_id %}
+      <p class="empty-text">
+        Steam library is not connected.
+      </p>
+    {% elif profile_user.steam_sync_status == "waiting" %}
+      <p class="empty-text">
+        Steam library update waiting...
+      </p>
+    {% elif profile_user.steam_sync_status == "syncing" %}
+      <p class="empty-text">
+        Steam library is syncing...
+      </p>
+    {% elif profile_user.steam_sync_status == "error" %}
+      <p class="empty-text">
+        Steam library synchronization error.
+      </p>
+    {% elif profile_user.steam_sync_status == "completed" %}
+      <div class="games-grid">
+        {% for item in profile_user.steam_library.all %}
+          <a href="{% url 'games:game-detail' item.game.pk %}" class="game-card">
+            <div class="game-cover">
+              {% if item.game.cover %}
+                <img src="{{ item.game.cover }}" alt="{{ item.game.title }}">
+              {% else %}
+                <img src="{% static 'images/default-game.png' %}" alt="Game">
+              {% endif %}
+            </div>
+            <div class="game-body">
+              <h5>
+                {{ item.game.title }}
+              </h5>
+              <p>
+                {{ item.playtime_forever }} minutes played
+              </p>
+            </div>
+          </a>
+        {% empty %}
+          <p class="empty-text">
+            Your access to library is not public. Change it in Steam settings.
+          </p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
 {% endblock %}

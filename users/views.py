@@ -1,14 +1,22 @@
+import asyncio
+import threading
+from datetime import timedelta
+
 from dal import autocomplete
+from django.contrib import messages
 from django.contrib.auth import views
 from django.contrib.auth.mixins import (
     LoginRequiredMixin,
-    UserPassesTestMixin
+    UserPassesTestMixin,
 )
-from django.shortcuts import get_object_or_404
+from django.db.models import Prefetch
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import generic
 
-from games.models import Game
+from games.models import Game, UserGame
+from games.services import SteamService
 from users.forms import (
     UserRegistrationForm,
     UserLoginForm,
@@ -17,10 +25,45 @@ from users.forms import (
 from users.models import User
 
 
+def sync_library_background(user_id):
+    user = User.objects.get(
+        id=user_id
+    )
+    user.steam_sync_status = "syncing"
+    user.save(
+        update_fields=[
+            "steam_sync_status"
+        ]
+    )
+    try:
+        asyncio.run(
+            SteamService.sync_library(
+                user
+            )
+        )
+        user.steam_sync_status = "completed"
+        user.steam_last_sync = timezone.now()
+        user.save(
+            update_fields=[
+                "steam_sync_status",
+                "steam_last_sync",
+            ]
+        )
+    except Exception:
+        user.steam_sync_status = "error"
+        user.save(
+            update_fields=[
+                "steam_sync_status"
+            ]
+        )
+
+
 class RegisterView(generic.CreateView):
     form_class = UserRegistrationForm
     template_name = "users/register.html"
-    success_url = reverse_lazy("users:login")
+    success_url = reverse_lazy(
+        "users:login"
+    )
 
 
 class LoginView(views.LoginView):
@@ -31,7 +74,6 @@ class LoginView(views.LoginView):
 class GameAutocomplete(
     autocomplete.Select2QuerySetView
 ):
-
     def get_queryset(self):
         qs = Game.objects.all()
         if self.q:
@@ -51,18 +93,30 @@ class ProfileDetailView(
 
     def get_object(self):
         return get_object_or_404(
-            User,
+            User.objects.prefetch_related(
+                Prefetch(
+                    "steam_library",
+                    queryset=UserGame.objects.select_related(
+                        "game"
+                    ).order_by(
+                        "-playtime_forever"
+                    )
+                )
+            ),
             pk=self.kwargs["pk"]
         )
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
+    def get_context_data(
+        self,
+        **kwargs
+    ):
+        context = super().get_context_data(
+            **kwargs
+        )
         if self.request.user == self.object:
             context["form"] = UserProfileForm(
                 instance=self.object
             )
-
         return context
 
 
@@ -77,10 +131,18 @@ class ProfileUpdateView(
     context_object_name = "profile_user"
 
     def test_func(self):
-        return self.request.user == self.get_object()
+        return (
+            self.request.user ==
+            self.get_object()
+        )
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_context_data(
+        self,
+        **kwargs
+    ):
+        context = super().get_context_data(
+            **kwargs
+        )
         context["edit_mode"] = True
         return context
 
@@ -90,4 +152,92 @@ class ProfileUpdateView(
             kwargs={
                 "pk": self.object.pk
             }
+        )
+
+    def form_valid(
+        self,
+        form
+    ):
+        old_steam_id = self.get_object().steam_id
+        response = super().form_valid(
+            form
+        )
+        steam_changed = (
+            self.object.steam_id
+            and self.object.steam_id != old_steam_id
+        )
+        if steam_changed:
+            self.object.steam_sync_status = "waiting"
+            self.object.save(
+                update_fields=[
+                    "steam_sync_status"
+                ]
+            )
+            threading.Thread(
+                target=sync_library_background,
+                args=(
+                    self.object.id,
+                ),
+                daemon=True,
+            ).start()
+        return response
+
+
+class UpdateSteamLibraryView(
+    LoginRequiredMixin,
+    generic.View
+):
+    def post(
+        self,
+        request,
+        pk
+    ):
+        user = request.user
+        if not user.steam_id:
+            messages.error(
+                request,
+                "Steam ID is not connected."
+            )
+            return redirect(
+                "users:profile",
+                pk=user.pk
+            )
+        if (
+            user.steam_last_update_request
+            and timezone.now()
+            -
+            user.steam_last_update_request
+            <
+            timedelta(minutes=10)
+        ):
+            messages.warning(
+                request,
+                "You can update library only every 10 minutes."
+            )
+            return redirect(
+                "users:profile",
+                pk=user.pk
+            )
+        user.steam_last_update_request = timezone.now()
+        user.steam_sync_status = "waiting"
+        user.save(
+            update_fields=[
+                "steam_last_update_request",
+                "steam_sync_status",
+            ]
+        )
+        threading.Thread(
+            target=sync_library_background,
+            args=(
+                user.id,
+            ),
+            daemon=True,
+        ).start()
+        messages.success(
+            request,
+            "Steam library update started."
+        )
+        return redirect(
+            "users:profile",
+            pk=user.pk
         )

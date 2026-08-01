@@ -59,7 +59,6 @@ LOGOUT_REDIRECT_URL = "/"
 
 STEAM_API_KEY = os.getenv("STEAM_API_KEY")
 
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

@@ -16,14 +16,8 @@
     Games
   </h1>
 
-  <form method="get" class="mb-4">
-    <input
-        type="text"
-        name="q"
-        value="{{ request.GET.q }}"
-        class="form-control"
-        placeholder="Search games..."
-    >
+  <form method="get" class="search-form mb-4">
+    {{ search_form }}
   </form>
 
   <div class="games-grid">
@@ -66,8 +60,8 @@
             {% for genre in game.genres.all %}
 
               <span class="genre-badge">
-          {{ genre.name }}
-        </span>
+                {{ genre.name }}
+              </span>
 
             {% endfor %}
 

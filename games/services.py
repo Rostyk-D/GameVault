@@ -1,6 +1,7 @@
 import requests
-
+from asgiref.sync import sync_to_async
 from django.conf import settings
+from django.utils import timezone
 from django.utils.text import slugify
 
 from games.models import (
@@ -13,8 +14,8 @@ from games.models import (
 
 class SteamService:
     IGNORED_APPIDS = [
-        365670,  # Blender
-        431960,  # Wallpaper Engine
+        365670,
+        431960,
     ]
 
     IGNORED_TYPES = [
@@ -42,12 +43,11 @@ class SteamService:
             response = requests.get(
                 url,
                 params=params,
-                timeout=10,
+                timeout=15,
             )
 
             return (
-                response
-                .json()
+                response.json()
                 .get("response", {})
                 .get("games", [])
             )
@@ -65,13 +65,11 @@ class SteamService:
         try:
             response = requests.get(
                 url,
-                timeout=10,
+                timeout=15,
             )
 
-            data = response.json()
-
             return (
-                data
+                response.json()
                 .get(str(appid), {})
                 .get("data")
             )
@@ -81,27 +79,21 @@ class SteamService:
 
     @staticmethod
     def get_cover(appid, details=None):
-
         covers = []
 
         if details:
-            header = details.get(
+            image = details.get(
                 "header_image"
             )
 
-            if header:
-                covers.append(header)
+            if image:
+                covers.append(image)
 
-        covers.extend(
-            [
-                f"https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/{appid}/header.jpg",
-                f"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{appid}/header.jpg",
-                f"https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/{appid}/header.jpg",
-            ]
+        covers.append(
+            f"https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/{appid}/header.jpg"
         )
 
         for cover in covers:
-
             try:
                 response = requests.head(
                     cover,
@@ -117,152 +109,202 @@ class SteamService:
         return None
 
     @staticmethod
-    def create_slug(title, appid):
-        return (
-            f"{slugify(title)}-{appid}"
-        )
+    def create_slug(
+        title,
+        appid
+    ):
+        return f"{slugify(title)}-{appid}"
 
     @classmethod
-    def sync_library(cls, user):
+    async def sync_library(
+        cls,
+        user
+    ):
+        try:
+            user.steam_sync_status = "syncing"
+            user.steam_sync_progress = 0
 
-        steam_games = cls.get_owned_games(
-            user.steam_id
-        )
-
-        created = 0
-
-        for steam_game in steam_games:
-
-            appid = steam_game["appid"]
-
-            if appid in cls.IGNORED_APPIDS:
-                continue
-
-            details = cls.get_game_details(
-                appid
+            await sync_to_async(
+                user.save
+            )(
+                update_fields=[
+                    "steam_sync_status",
+                    "steam_sync_progress",
+                ]
             )
 
-            if not details:
-                continue
-
-            if details.get("type") in cls.IGNORED_TYPES:
-                continue
-
-            developer = None
-
-            developers = details.get(
-                "developers",
-                []
+            steam_games = await sync_to_async(
+                cls.get_owned_games
+            )(
+                user.steam_id
             )
 
-            if developers:
-                developer, _ = (
-                    Developer.objects.get_or_create(
+            if not steam_games:
+                user.steam_library_status = "private"
+                user.steam_sync_status = "completed"
+                user.steam_last_sync = timezone.now()
+
+                await sync_to_async(
+                    user.save
+                )(
+                    update_fields=[
+                        "steam_library_status",
+                        "steam_sync_status",
+                        "steam_last_sync",
+                    ]
+                )
+
+                return
+
+            user.steam_library_status = "public"
+
+            await sync_to_async(
+                user.save
+            )(
+                update_fields=[
+                    "steam_library_status",
+                ]
+            )
+
+            processed = 0
+
+            for steam_game in steam_games:
+
+                appid = steam_game.get(
+                    "appid"
+                )
+
+                if appid in cls.IGNORED_APPIDS:
+                    continue
+
+                details = await sync_to_async(
+                    cls.get_game_details
+                )(
+                    appid
+                )
+
+                if not details:
+                    continue
+
+                if details.get(
+                    "type"
+                ) in cls.IGNORED_TYPES:
+                    continue
+
+                developer = None
+
+                developers = details.get(
+                    "developers",
+                    []
+                )
+
+                if developers:
+                    developer, _ = await sync_to_async(
+                        Developer.objects.get_or_create
+                    )(
                         name=developers[0]
+                    )
+
+                title = details.get(
+                    "name",
+                    steam_game.get(
+                        "name",
+                        "Unknown"
                     )
                 )
 
-            game, is_created = (
-                Game.objects.get_or_create(
+                game, _ = await sync_to_async(
+                    Game.objects.get_or_create
+                )(
                     steam_appid=appid,
                     defaults={
-                        "title": details.get(
-                            "name",
-                            steam_game.get(
-                                "name",
-                                "Unknown"
-                            )
-                        ),
+                        "title": title,
                         "slug": cls.create_slug(
-                            details.get(
-                                "name",
-                                "unknown"
-                            ),
+                            title,
                             appid,
                         ),
                     }
                 )
-            )
 
-            game.title = details.get(
-                "name",
-                game.title
-            )
+                game.title = title
+                game.description = details.get(
+                    "short_description",
+                    ""
+                )
 
-            game.description = details.get(
-                "short_description",
-                ""
-            )
+                game.cover = await sync_to_async(
+                    cls.get_cover
+                )(
+                    appid,
+                    details
+                )
 
-            game.cover = cls.get_cover(
-                appid,
-                details
-            )
+                game.developer = developer
 
-            game.developer = developer
+                await sync_to_async(
+                    game.save
+                )()
 
-            game.save()
-
-            for genre in details.get(
-                "genres",
-                []
-            ):
-
-                genre_obj, _ = (
-                    Genre.objects.get_or_create(
+                for genre in details.get(
+                    "genres",
+                    []
+                ):
+                    genre_obj, _ = await sync_to_async(
+                        Genre.objects.get_or_create
+                    )(
                         name=genre["description"]
                     )
-                )
 
-                game.genres.add(
-                    genre_obj
-                )
-
-            UserGame.objects.update_or_create(
-                user=user,
-                game=game,
-                defaults={
-                    "playtime_forever": steam_game.get(
-                        "playtime_forever",
-                        0
+                    await sync_to_async(
+                        game.genres.add
+                    )(
+                        genre_obj
                     )
-                }
-            )
 
-            if is_created:
-                created += 1
+                await sync_to_async(
+                    UserGame.objects.update_or_create
+                )(
+                    user=user,
+                    game=game,
+                    defaults={
+                        "playtime_forever": steam_game.get(
+                            "playtime_forever",
+                            0
+                        )
+                    }
+                )
 
-        return created
+                processed += 1
 
-    @classmethod
-    def update_game_covers(cls):
+                user.steam_sync_progress = processed
 
-        updated = 0
-
-        for game in Game.objects.all():
-
-            details = cls.get_game_details(
-                game.steam_appid
-            )
-
-            if not details:
-                continue
-
-            cover = cls.get_cover(
-                game.steam_appid,
-                details
-            )
-
-            if cover and game.cover != cover:
-
-                game.cover = cover
-
-                game.save(
+                await sync_to_async(
+                    user.save
+                )(
                     update_fields=[
-                        "cover"
+                        "steam_sync_progress"
                     ]
                 )
 
-                updated += 1
+            user.steam_sync_status = "completed"
+            user.steam_last_sync = timezone.now()
 
-        return updated
+            await sync_to_async(
+                user.save
+            )(
+                update_fields=[
+                    "steam_sync_status",
+                    "steam_last_sync",
+                ]
+            )
+
+        except Exception:
+            user.steam_sync_status = "error"
+
+            await sync_to_async(
+                user.save
+            )(
+                update_fields=[
+                    "steam_sync_status"
+                ]
+            )

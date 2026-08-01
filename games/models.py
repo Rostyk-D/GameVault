@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
+from django.conf import settings
 
 
 class Developer(models.Model):
@@ -87,16 +88,17 @@ class Game(models.Model):
 
 
 class UserGame(models.Model):
+
     user = models.ForeignKey(
-        "users.User",
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="library",
+        related_name="steam_library"
     )
 
     game = models.ForeignKey(
         Game,
         on_delete=models.CASCADE,
-        related_name="owners"
+        related_name="players"
     )
 
     playtime_forever = models.PositiveIntegerField(
@@ -113,6 +115,3 @@ class UserGame(models.Model):
             "user",
             "game",
         )
-
-    def __str__(self):
-        return f"{self.user} - {self.game}"

@@ -6,6 +6,7 @@ from users.views import (
     ProfileDetailView,
     ProfileUpdateView,
     GameAutocomplete,
+    UpdateSteamLibraryView,
 )
 
 app_name = "users"
@@ -37,5 +38,10 @@ urlpatterns = [
         "games-autocomplete/",
         GameAutocomplete.as_view(),
         name="games-autocomplete",
+    ),
+    path(
+        "profile/<int:pk>/steam-update/",
+        UpdateSteamLibraryView.as_view(),
+        name="steam-update",
     ),
 ]

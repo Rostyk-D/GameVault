@@ -5,6 +5,7 @@ from games.models import Game
 
 
 class User(AbstractUser):
+
     MALE = "male"
     FEMALE = "female"
     OTHER = "other"
@@ -13,6 +14,14 @@ class User(AbstractUser):
         (MALE, "Male"),
         (FEMALE, "Female"),
         (OTHER, "Other"),
+    )
+
+    PUBLIC = "public"
+    PRIVATE = "private"
+
+    STEAM_PROFILE_CHOICES = (
+        (PUBLIC, "Public"),
+        (PRIVATE, "Private"),
     )
 
     gender = models.CharField(
@@ -39,6 +48,31 @@ class User(AbstractUser):
         blank=True,
         null=True,
         unique=True,
+    )
+
+    steam_library_status = models.CharField(
+        max_length=10,
+        choices=STEAM_PROFILE_CHOICES,
+        default=PRIVATE,
+    )
+
+    steam_sync_status = models.CharField(
+        max_length=20,
+        default="not_synced",
+    )
+
+    steam_last_sync = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    steam_last_update_request = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    steam_sync_progress = models.PositiveIntegerField(
+        default=0
     )
 
     reputation = models.PositiveIntegerField(

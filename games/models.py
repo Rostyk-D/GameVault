@@ -115,3 +115,45 @@ class UserGame(models.Model):
             "user",
             "game",
         )
+
+
+class GameComment(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="game_comments",
+    )
+
+    game = models.ForeignKey(
+        Game,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+
+    text = models.TextField(
+        max_length=1000,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "user",
+                    "game",
+                ],
+                name="unique_user_game_comment",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.game.title}"

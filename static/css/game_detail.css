@@ -1,0 +1,122 @@
+.game-detail {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.game-detail-card {
+    background: var(--bg-card);
+
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+
+    overflow: hidden;
+    transition: .2s;
+}
+
+.game-detail-card:hover {
+    border-color: var(--accent-color);
+}
+
+.game-detail-cover {
+    width: 100%;
+    aspect-ratio: 460 / 215;
+
+    overflow: hidden;
+    background: #111;
+}
+
+.game-detail-cover img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    transition: .25s;
+}
+
+.game-detail-body {
+    padding: 2rem;
+}
+
+.game-detail-body h1 {
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+}
+
+.game-info p {
+    color: var(--text-secondary);
+    margin-bottom: .5rem;
+}
+
+.game-info strong {
+    color: var(--text-main);
+}
+
+.detail-genres {
+    margin: 1.5rem 0;
+}
+
+.game-description {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.game-description h4 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.game-description p {
+    color: var(--text-secondary);
+
+    line-height: 1.7;
+
+}
+
+.back-button {
+    display: inline-block;
+    margin-top: 2rem;
+    padding: .7rem 1.2rem;
+    border-radius: var(--border-radius);
+
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    text-decoration: none;
+
+    transition: .2s;
+}
+
+.back-button:hover {
+    border-color: var(--accent-color);
+    color: var(--text-main);
+
+    transform: translateY(-3px);
+}
+
+.game-comments {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.game-comments h3 {
+    font-weight: 700;
+
+    margin-bottom: 1.5rem;
+}
+
+.comment-card {
+    background: var(--bg-main);
+
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.comment-card p {
+    margin-top: .5rem;
+
+    color: var(--text-secondary);
+}

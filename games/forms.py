@@ -1,5 +1,7 @@
 from django import forms
 
+from games.models import GameComment
+
 
 class GameSearchForm(forms.Form):
     q = forms.CharField(
@@ -12,3 +14,22 @@ class GameSearchForm(forms.Form):
             }
         ),
     )
+
+class GameCommentForm(forms.ModelForm):
+
+    class Meta:
+        model = GameComment
+
+        fields = [
+            "text",
+        ]
+
+        widgets = {
+            "text": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Write your opinion...",
+                    "rows": 4,
+                }
+            )
+        }

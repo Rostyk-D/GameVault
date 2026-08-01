@@ -10,19 +10,19 @@ def home(request):
     context = {
         "popular_collections": GameCollection.objects.filter(
             is_public=True
-        ).order_by("-likes")[:6],
+        ).order_by("-likes")[:3],
 
         "latest_collections": GameCollection.objects.filter(
             is_public=True
-        ).order_by("-created_at")[:6],
+        ).order_by("-created_at")[:3],
 
         "most_used_games": Game.objects.annotate(
             collection_count=Count("game_collections")
-        ).order_by("-collection_count")[:6],
+        ).order_by("-collection_count")[:3],
 
         "top_users": User.objects.order_by(
             "-reputation"
-        )[:5],
+        )[:3],
     }
 
     return render(

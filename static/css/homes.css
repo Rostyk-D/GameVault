@@ -1,0 +1,87 @@
+.hero-section {
+    background: linear-gradient(
+            135deg,
+            #1b2735,
+            var(--bg-main)
+    );
+    border-radius: 1rem;
+}
+
+.section-title {
+    margin-bottom: 2rem;
+    font-weight: 700;
+}
+
+.game-card {
+    transition: transform var(--transition),
+    border-color var(--transition);
+
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+}
+
+.game-card h4,
+.game-card h5,
+.game-card .card-title,
+.game-title {
+    color: var(--text-main) !important;
+    font-weight: 700;
+}
+
+.game-card p {
+    color: var(--text-secondary);
+}
+
+.game-card .collection-count {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.game-card a {
+    text-decoration: none;
+}
+
+.game-card:hover {
+    transform: translateY(-0.3rem);
+    border-color: var(--accent-color);
+}
+
+.game-cover {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.game-card .btn {
+    transition: all var(--transition);
+}
+
+.leaderboard {
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.leader-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.leader-item:last-child {
+    border-bottom: none;
+}
+
+.game-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+}
+
+.game-card-link:hover {
+    color: inherit;
+}
+
+.game-card-link .game-card {
+    height: 100%;
+}

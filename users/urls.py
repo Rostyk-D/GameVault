@@ -35,9 +35,9 @@ urlpatterns = [
     ),
 
     path(
-        "games-autocomplete/",
+        "game-autocomplete/",
         GameAutocomplete.as_view(),
-        name="games-autocomplete",
+        name="game-autocomplete",
     ),
     path(
         "profile/<int:pk>/steam-update/",

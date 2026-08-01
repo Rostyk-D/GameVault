@@ -1,17 +1,11 @@
 {% extends "base/base.html" %}
 {% load static %}
-
 {% block title %}
   Home | GameVault
 {% endblock %}
-
 {% block extra_css %}
-  <link
-      rel="stylesheet"
-      href="{% static 'css/home.css' %}"
-  >
+  <link rel="stylesheet" href="{% static "css/homes.css" %}">
 {% endblock %}
-
 {% block content %}
   <section class="hero-section text-center p-5 mb-5 rounded">
     <h1 class="display-3 fw-bold">
@@ -21,7 +15,7 @@
       Discover games through player-created collections.
     </p>
     <p class="text-secondary">
-      Create your own collections and explain:
+      Find games recommended by players:
       <br>
       <strong>"Why should I play this?"</strong>
     </p>
@@ -29,12 +23,13 @@
       <a href="#" class="btn btn-primary btn-lg me-2">
         Explore Collections
       </a>
-      <a href="#" class="btn btn-outline-light btn-lg">
-        Create Collection
-      </a>
+      {% if user.is_authenticated %}
+        <a href="#" class="btn btn-outline-light btn-lg">
+          Create Collection
+        </a>
+      {% endif %}
     </div>
   </section>
-
 
   <section class="mb-5">
     <h2 class="section-title">
@@ -56,19 +51,19 @@
                 <br>
                 🎮 {{ collection.games.count }} games
               </div>
-              <a href="#"
-                 class="btn btn-primary mt-3 w-100">
+              <a href="#" class="btn btn-primary mt-3 w-100">
                 View Collection
               </a>
             </div>
           </div>
         </div>
       {% empty %}
-        <p>No collections yet.</p>
+        <p class="empty-text">
+          No featured collections yet.
+        </p>
       {% endfor %}
     </div>
   </section>
-
 
   <section class="mb-5">
     <h2 class="section-title">
@@ -76,8 +71,8 @@
     </h2>
     <div class="row g-4">
       {% for collection in latest_collections %}
-        <div class="col-lg-4">
-          <div class="card game-card">
+        <div class="col-lg-4 col-md-6">
+          <div class="card game-card h-100">
             <div class="card-body">
               <h5>
                 {{ collection.title }}
@@ -86,37 +81,49 @@
                 {{ collection.description|truncatewords:12 }}
               </p>
               <span class="badge bg-dark">
-{{ collection.created_at|date:"M d, Y" }}
-</span>
+              {{ collection.created_at|date:"M d, Y" }}
+            </span>
             </div>
           </div>
         </div>
       {% empty %}
-        <p>No collections yet.</p>
+        <p class="empty-text">
+          No collections yet.
+        </p>
       {% endfor %}
     </div>
   </section>
 
+<section class="mb-5">
+  <h2 class="section-title">
+    🎮 Most Used Games
+  </h2>
 
-  <section class="mb-5">
-    <h2 class="section-title">
-      🎮 Most Used Games
-    </h2>
-    <div class="row g-4">
-      {% for game in most_used_games %}
-        <div class="col-xl-3 col-lg-4 col-md-6">
+  <div class="row g-4">
+    {% for game in most_used_games %}
+      <div class="col-xl-3 col-lg-4 col-md-6">
+        <a href="{% url 'games:game-detail' game.id %}" class="game-card-link">
           <div class="card game-card h-100">
+
             {% if game.cover %}
               <img
-                  src="{{ game.cover.url }}"
+                  src="{{ game.cover }}"
                   class="card-img-top game-cover"
                   alt="{{ game.title }}"
               >
+            {% else %}
+              <img
+                  src="{% static 'images/default-game.png' %}"
+                  class="card-img-top game-cover"
+                  alt="Game"
+              >
             {% endif %}
+
             <div class="card-body">
-              <h5>
+              <h5 class="game-title">
                 {{ game.title }}
               </h5>
+
               <p class="text-secondary">
                 Added to
                 <strong>
@@ -125,14 +132,17 @@
                 collections
               </p>
             </div>
-          </div>
-        </div>
-      {% empty %}
-        <p>No Game yet.</p>
-      {% endfor %}
-    </div>
-  </section>
 
+          </div>
+        </a>
+      </div>
+    {% empty %}
+      <p class="empty-text">
+        No games yet.
+      </p>
+    {% endfor %}
+  </div>
+</section>
 
   <section class="mb-5">
     <h2 class="section-title">
@@ -151,10 +161,10 @@
           </div>
         </div>
       {% empty %}
-        <p>No User yet.</p>
+        <p class="empty-text">
+          No users yet.
+        </p>
       {% endfor %}
     </div>
   </section>
-
-
 {% endblock %}

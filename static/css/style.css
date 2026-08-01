@@ -14,12 +14,10 @@
     --transition: 0.3s;
 }
 
-
 body {
     background-color: var(--bg-main);
     color: var(--text-main);
 }
-
 
 .card {
     background-color: var(--bg-card);

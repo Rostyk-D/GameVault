@@ -90,6 +90,18 @@ class UserRegistrationForm(UserCreationForm):
 
 
 class UserProfileForm(forms.ModelForm):
+    favorite_game = forms.ModelChoiceField(
+        queryset=Game.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="users:game-autocomplete",
+            attrs={
+                "data-placeholder": "Search favorite game...",
+                "style": "width:100%",
+            },
+        ),
+    )
+
     class Meta:
         model = User
         fields = (
@@ -107,26 +119,17 @@ class UserProfileForm(forms.ModelForm):
                     "placeholder": "example@gmail.com",
                 }
             ),
-
             "gender": forms.Select(
                 attrs={
                     "class": "form-select",
                 }
             ),
-
             "age": forms.NumberInput(
                 attrs={
                     "class": "form-control",
                     "placeholder": "Your age",
                 }
             ),
-
-            "favorite_game": forms.Select(
-                attrs={
-                    "class": "form-select",
-                }
-            ),
-
             "steam_id": forms.TextInput(
                 attrs={
                     "class": "form-control",
@@ -138,17 +141,5 @@ class UserProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields["favorite_game"].queryset = Game.objects.all()
-
         for field in self.fields.values():
             field.help_text = ""
-
-    def clean_age(self):
-        age = self.cleaned_data.get("age")
-
-        if age is not None and (age < 12 or age > 99):
-            raise forms.ValidationError(
-                "Age must be between 12 and 99."
-            )
-
-        return age

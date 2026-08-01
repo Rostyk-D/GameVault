@@ -120,3 +120,30 @@
 
     color: var(--text-secondary);
 }
+
+.comment-actions button {
+    transition: 0.2s ease;
+}
+
+
+.comment-actions button:hover {
+    transform: scale(1.05);
+}
+
+
+.comment-actions .active-vote {
+    color: white;
+    font-weight: bold;
+}
+
+
+.comment-actions .btn-outline-success.active-vote {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+
+.comment-actions .btn-outline-danger.active-vote {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}

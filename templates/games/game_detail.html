@@ -11,164 +11,232 @@
 {% endblock %}
 
 {% block content %}
-<div class="game-detail">
-  <div class="game-detail-card">
-    <div class="game-detail-cover">
-      {% if game.cover %}
-        <img
-            src="{{ game.cover }}"
-            alt="{{ game.title }}"
-        >
-      {% else %}
-        <img
-            src="{% static 'images/default-game.png' %}"
-            alt="Game"
-        >
-      {% endif %}
-    </div>
-    <div class="game-detail-body">
-      <h1>
-        {{ game.title }}
-      </h1>
-      <div class="game-info">
-        {% if game.developer %}
-          <p>
-            Developer:
-            <strong>
-              {{ game.developer }}
-            </strong>
-          </p>
-        {% endif %}
-        {% if game.release_date %}
-          <p>
-            Release date:
-            <strong>
-              {{ game.release_date }}
-            </strong>
-          </p>
-        {% endif %}
-        {% if game.steam_appid %}
-          <p>
-            Steam App ID:
-            <strong>
-              {{ game.steam_appid }}
-            </strong>
-          </p>
+  <div class="game-detail">
+
+    <div class="game-detail-card">
+
+      <div class="game-detail-cover">
+        {% if game.cover %}
+          <img src="{{ game.cover }}" alt="{{ game.title }}">
+        {% else %}
+          <img src="{% static 'images/default-game.png' %}" alt="Game">
         {% endif %}
       </div>
-      <div class="genre-list detail-genres">
-        {% for genre in game.genres.all %}
-          <span class="genre-badge">
+
+      <div class="game-detail-body">
+
+        <h1>{{ game.title }}</h1>
+
+        <div class="game-info">
+
+          {% if game.developer %}
+            <p>
+              Developer:
+              <strong>{{ game.developer }}</strong>
+            </p>
+          {% endif %}
+
+          {% if game.release_date %}
+            <p>
+              Release date:
+              <strong>{{ game.release_date }}</strong>
+            </p>
+          {% endif %}
+
+          {% if game.steam_appid %}
+            <p>
+              Steam App ID:
+              <strong>{{ game.steam_appid }}</strong>
+            </p>
+          {% endif %}
+
+        </div>
+
+        <div class="genre-list detail-genres">
+          {% for genre in game.genres.all %}
+            <span class="genre-badge">
             {{ genre.name }}
           </span>
-        {% empty %}
-          <span class="text-secondary">
+          {% empty %}
+            <span class="text-secondary">
             No genres
           </span>
-        {% endfor %}
+          {% endfor %}
+        </div>
+
+        <div class="game-description">
+
+          <h4>
+            About game
+          </h4>
+
+          {% if game.description %}
+            <p>
+              {{ game.description }}
+            </p>
+          {% else %}
+            <p>
+              No description available.
+            </p>
+          {% endif %}
+
+        </div>
+
       </div>
-      <div class="game-description">
-        <h4>
-          About game
-        </h4>
-        {% if game.description %}
-          <p>
-            {{ game.description }}
-          </p>
-        {% else %}
-          <p>
-            No description available.
-          </p>
-        {% endif %}
-      </div>
+
     </div>
-  </div>
 
-  <div class="game-comments">
-    <h3>
-      Comments
-    </h3>
 
-    {% if user.is_authenticated %}
+    <div class="game-comments">
 
-      <div id="comment-form">
+      <h3>
+        Comments
+      </h3>
+
+      {% if user.is_authenticated %}
+
         {% if not user_comment %}
-          <form
-              method="post"
-              action="{% url 'games:game-comment' game.pk %}"
-          >
+
+          <form method="post" action="{% url 'games:game-detail' game.pk %}">
+
             {% csrf_token %}
+
             {{ comment_form }}
+
             <button
                 type="submit"
                 class="btn btn-primary mt-3"
             >
               Save comment
             </button>
+
           </form>
+
         {% else %}
+
           <button
               class="btn btn-outline-primary mb-3"
-              onclick="showCommentForm()"
+              onclick="document.getElementById('edit-comment').style.display='block'; this.style.display='none';"
           >
             Edit my comment
           </button>
+
+          <form
+              method="post"
+              id="edit-comment"
+              style="display:none;"
+          >
+
+            {% csrf_token %}
+
+            {{ comment_form }}
+
+            <button
+                type="submit"
+                class="btn btn-success mt-3"
+            >
+              Update comment
+            </button>
+
+          </form>
+
         {% endif %}
+
+      {% else %}
+
+        <p class="text-secondary">
+          Login to leave a comment.
+        </p>
+
+      {% endif %}
+
+
+      <div class="comments-list">
+
+        {% for comment in comments %}
+
+          <div class="comment-card {% if comment == user_comment %}my-comment{% endif %}">
+
+            <strong>
+              {{ comment.user.username }}
+            </strong>
+
+            {% if comment == user_comment %}
+              <span class="badge bg-primary">
+              You
+            </span>
+            {% endif %}
+
+            <p>
+              {{ comment.text }}
+            </p>
+
+            <small>
+              Updated:
+              {{ comment.updated_at }}
+            </small>
+
+            <div class="comment-actions mt-2">
+
+              <form
+                  method="post"
+                  action="{% url 'games:comment-vote' comment.pk 1 %}"
+                  style="display:inline;"
+              >
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="btn btn-sm btn-outline-success {% if comment.user_vote == 1 %}active-vote{% endif %}"
+                >
+                  👍 {{ comment.likes_count }}
+                </button>
+
+              </form>
+
+
+              <form
+                  method="post"
+                  action="{% url 'games:comment-vote' comment.pk -1 %}"
+                  style="display:inline;"
+              >
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="btn btn-sm btn-outline-danger {% if comment.user_vote == -1 %}active-vote{% endif %}"
+                >
+                  👎 {{ comment.dislikes_count }}
+                </button>
+
+              </form>
+
+            </div>
+
+          </div>
+
+        {% empty %}
+
+          <p class="text-secondary">
+            No comments yet.
+          </p>
+
+        {% endfor %}
+
       </div>
 
-    {% else %}
 
-      <p class="text-secondary">
-        Login to leave a comment.
-      </p>
+      {% include "includes/pagination.html" %}
 
-    {% endif %}
-
-    <div class="comments-list">
-      {% for comment in game.comments.all %}
-        <div class="comment-card">
-          <strong>
-            {{ comment.user.username }}
-          </strong>
-          <p>
-            {{ comment.text }}
-          </p>
-          <small>
-            Updated:
-            {{ comment.updated_at }}
-          </small>
-        </div>
-      {% empty %}
-        <p class="text-secondary">
-          No comments yet.
-        </p>
-      {% endfor %}
     </div>
+
+
+    <a
+        href="{% url 'games:game-list' %}"
+        class="back-button"
+    >
+      ← Back to games
+    </a>
+
   </div>
-
-  <a
-      href="{% url 'games:game-list' %}"
-      class="back-button"
-  >
-    ← Back to games
-  </a>
-</div>
-
-<script>
-function showCommentForm() {
-  document.getElementById("comment-form").innerHTML = `
-    <form method="post"
-          action="{% url 'games:game-comment' game.pk %}">
-      {% csrf_token %}
-      {{ comment_form.as_p }}
-      <button
-          type="submit"
-          class="btn btn-primary mt-3"
-      >
-        Save comment
-      </button>
-    </form>
-  `;
-}
-</script>
 {% endblock %}

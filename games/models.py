@@ -157,3 +157,46 @@ class GameComment(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.game.title}"
+
+class CommentVote(models.Model):
+    LIKE = 1
+    DISLIKE = -1
+
+    VOTE_CHOICES = (
+        (LIKE, "Like"),
+        (DISLIKE, "Dislike"),
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="comment_votes",
+    )
+
+    comment = models.ForeignKey(
+        GameComment,
+        on_delete=models.CASCADE,
+        related_name="votes",
+    )
+
+    value = models.SmallIntegerField(
+        choices=VOTE_CHOICES,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "user",
+                    "comment",
+                ],
+                name="unique_comment_vote",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user} - {self.comment} - {self.value}"

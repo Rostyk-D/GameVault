@@ -1,5 +1,7 @@
-{% load query_transform %}
+{% load static %}
 
+{% load query_transform %}
+  <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
 {% if is_paginated %}
 
   <nav class="mt-5">

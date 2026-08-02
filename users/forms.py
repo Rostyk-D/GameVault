@@ -143,3 +143,16 @@ class UserProfileForm(forms.ModelForm):
 
         for field in self.fields.values():
             field.help_text = ""
+
+
+class SteamLibrarySearchForm(forms.Form):
+    query = forms.CharField(
+        required=False,
+        label="",
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-field",
+                "placeholder": "Search Steam games...",
+            }
+        ),
+    )

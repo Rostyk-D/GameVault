@@ -4,7 +4,7 @@
   Home | GameVault
 {% endblock %}
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static "css/homes.css" %}">
+  <link rel="stylesheet" href="{% static 'css/homes.css' %}">
 {% endblock %}
 {% block content %}
   <section class="hero-section text-center p-5 mb-5 rounded">
@@ -14,57 +14,47 @@
     <p class="fs-4 mt-3">
       Discover games through player-created collections.
     </p>
-    <p class="text-secondary">
+    <p class="hero-text">
       Find games recommended by players:
       <br>
       <strong>"Why should I play this?"</strong>
     </p>
-    <div class="mt-4">
-      <a
-          href="{% url 'game_collections:list' %}"
-          class="btn btn-primary btn-lg me-2"
-      >
+    <div class="hero-buttons mt-4">
+      <a href="{% url 'game_collections:list' %}" class="btn btn-primary">
         Explore Collections
       </a>
       {% if user.is_authenticated %}
-        <a
-            href="{% url 'game_collections:create' %}"
-            class="btn btn-outline-light btn-lg"
-        >
+        <a href="{% url 'game_collections:create' %}" class="btn btn-outline-light">
           Create Collection
         </a>
       {% endif %}
     </div>
   </section>
 
-  <section class="mb-5">
+  <section class="home-section">
     <h2 class="section-title">
       🔥 Featured Collections
     </h2>
     <div class="row g-4">
       {% for collection in featured_collections %}
         <div class="col-lg-4 col-md-6">
-          <div class="card game-card h-100">
-            <div class="card-body">
+          <a href="{% url 'game_collections:detail' collection.pk %}" class="home-card-link">
+            <div class="home-card">
               <h4>
                 {{ collection.title }}
               </h4>
-              <p class="text-secondary">
+              <p class="collection-description">
                 {{ collection.description|truncatewords:18 }}
               </p>
-              <div class="small text-muted">
+              <div class="collection-info">
+                👍 {{ collection.reputation }}
+                <br>
                 👤 {{ collection.owner.username }}
                 <br>
                 🎮 {{ collection.games.count }} games
               </div>
-              <a
-                  href="{% url 'game_collections:detail' collection.pk %}"
-                  class="btn btn-primary mt-3 w-100"
-              >
-                View Collection
-              </a>
             </div>
-          </div>
+          </a>
         </div>
       {% empty %}
         <p class="empty-text">
@@ -74,26 +64,30 @@
     </div>
   </section>
 
-  <section class="mb-5">
+  <section class="home-section">
     <h2 class="section-title">
       🆕 Latest Collections
     </h2>
     <div class="row g-4">
       {% for collection in latest_collections %}
         <div class="col-lg-4 col-md-6">
-          <div class="card game-card h-100">
-            <div class="card-body">
-              <h5>
+          <a href="{% url 'game_collections:detail' collection.pk %}" class="home-card-link">
+            <div class="home-card">
+              <h4>
                 {{ collection.title }}
-              </h5>
-              <p class="text-secondary">
-                {{ collection.description|truncatewords:12 }}
+              </h4>
+              <p class="collection-description">
+                {{ collection.description|truncatewords:18 }}
               </p>
-              <span class="badge bg-dark">
-              {{ collection.created_at|date:"M d, Y" }}
-            </span>
+              <div class="collection-info">
+                👤 {{ collection.owner.username }}
+                <br>
+                🎮 {{ collection.games.count }} games
+                <br>
+                📅 {{ collection.created_at|date:"M d, Y" }}
+              </div>
             </div>
-          </div>
+          </a>
         </div>
       {% empty %}
         <p class="empty-text">
@@ -103,45 +97,26 @@
     </div>
   </section>
 
-  <section class="mb-5">
+  <section class="home-section">
     <h2 class="section-title">
       🎮 Most Used Games
     </h2>
-
     <div class="row g-4">
       {% for game in most_used_games %}
         <div class="col-xl-3 col-lg-4 col-md-6">
-          <a href="{% url 'games:game-detail' game.id %}" class="game-card-link">
-            <div class="card game-card h-100">
-
+          <a href="{% url 'games:game-detail' game.id %}" class="home-card-link">
+            <div class="home-card game-home-card">
               {% if game.cover %}
-                <img
-                    src="{{ game.cover }}"
-                    class="card-img-top game-cover"
-                    alt="{{ game.title }}"
-                >
+                <img src="{{ game.cover }}" alt="{{ game.title }}" class="game-cover">
               {% else %}
-                <img
-                    src="{% static 'images/default-game.png' %}"
-                    class="card-img-top game-cover"
-                    alt="Game"
-                >
+                <img src="{% static 'images/default-game.png' %}" alt="Game" class="game-cover">
               {% endif %}
-
-              <div class="card-body">
-                <h5 class="game-title">
-                  {{ game.title }}
-                </h5>
-
-                <p class="text-secondary">
-                  Added to
-                  <strong>
-                    {{ game.collection_count }}
-                  </strong>
-                  collections
-                </p>
-              </div>
-
+              <h5>
+                {{ game.title }}
+              </h5>
+              <p class="collection-info">
+                Added to {{ game.collection_count }} collections
+              </p>
             </div>
           </a>
         </div>
@@ -153,22 +128,20 @@
     </div>
   </section>
 
-  <section class="mb-5">
+  <section class="home-section">
     <h2 class="section-title">
       👑 Top Contributors
     </h2>
     <div class="leaderboard">
       {% for user in top_users %}
-        <div class="leader-item">
-          <div>
+        <a href="{% url "users:profile" user.pk %}" class="leader-item">
             <strong>
               {{ user.username }}
             </strong>
-          </div>
-          <div>
-            ⭐ {{ user.reputation }}
-          </div>
-        </div>
+          <span>
+          ⭐ {{ user.best_collection_rating|default:0 }}
+        </span>
+        </a>
       {% empty %}
         <p class="empty-text">
           No users yet.

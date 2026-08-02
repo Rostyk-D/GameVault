@@ -12,9 +12,7 @@
 
 {% block content %}
   <div class="game-detail">
-
     <div class="game-detail-card">
-
       <div class="game-detail-cover">
         {% if game.cover %}
           <img src="{{ game.cover }}" alt="{{ game.title }}">
@@ -24,7 +22,6 @@
       </div>
 
       <div class="game-detail-body">
-
         <h1>{{ game.title }}</h1>
 
         <div class="game-info">
@@ -48,6 +45,25 @@
               <strong>{{ game.steam_appid }}</strong>
             </p>
           {% endif %}
+
+          {% if game.steam_review_score %}
+            <div class="steam-rating">
+              <p>
+                Steam score:
+                <strong>{{ game.steam_review_score }}%</strong>
+              </p>
+
+              <p>
+                👍 Positive:
+                <strong>{{ game.steam_positive_reviews }}</strong>
+              </p>
+
+              <p>
+                👎 Negative:
+                <strong>{{ game.steam_negative_reviews }}</strong>
+              </p>
+            </div>
+          {% endif %}
         </div>
 
         <div class="genre-list detail-genres">
@@ -63,9 +79,7 @@
         </div>
 
         {% if user.is_authenticated %}
-
           <div class="collection-action">
-
             <button
                 type="button"
                 class="btn btn-success add-collection-btn"
@@ -86,38 +100,29 @@
               </h5>
 
               <div class="collection-checkboxes">
-
                 {% for collection in user_collections %}
-
                   <label class="collection-check {% if collection.has_game %}disabled{% endif %}">
-
                     <input
                         type="checkbox"
                         name="collections"
                         value="{{ collection.id }}"
-                        {% if collection.has_game %}checked disabled{% endif %}
-                    >
+                        {% if collection.has_game %}checked disabled{% endif %}>
 
                     <span>
-                  {{ collection.title }}
-                </span>
+                    {{ collection.title }}
+                  </span>
 
                     {% if collection.has_game %}
                       <small>
                         Added
                       </small>
                     {% endif %}
-
                   </label>
-
                 {% empty %}
-
                   <p class="text-secondary">
                     You don't have collections yet.
                   </p>
-
                 {% endfor %}
-
               </div>
 
               <button
@@ -125,16 +130,11 @@
                   class="btn btn-primary mt-3">
                 Add
               </button>
-
             </form>
-
           </div>
-
         {% endif %}
 
-
         <div class="game-description">
-
           <h4>
             About game
           </h4>
@@ -148,27 +148,18 @@
               No description available.
             </p>
           {% endif %}
-
         </div>
-
       </div>
-
     </div>
 
-
     <div class="game-comments">
-
       <h3>
         Comments
       </h3>
 
-
       {% if user.is_authenticated %}
-
         {% if not user_comment %}
-
           <form method="post">
-
             {% csrf_token %}
 
             <div class="comment-form">
@@ -180,17 +171,13 @@
                 class="btn btn-primary mt-3">
               Save comment
             </button>
-
           </form>
-
         {% else %}
-
           <button
               class="btn btn-outline-primary mb-3"
               onclick="toggleEditComment()">
             Edit my comment
           </button>
-
 
           <form
               method="post"
@@ -206,30 +193,20 @@
                 class="btn btn-success mt-3">
               Update comment
             </button>
-
           </form>
-
         {% endif %}
-
       {% else %}
-
         <p class="text-secondary">
           Login to leave a comment.
         </p>
-
       {% endif %}
 
-
       <div class="comments-list">
-
         {% for comment in comments %}
-
           <div class="comment-card {% if comment == user_comment %}my-comment{% endif %}">
-
             <strong>
               {{ comment.user.username }}
             </strong>
-
 
             {% if comment == user_comment %}
               <span class="badge bg-primary">
@@ -237,22 +214,19 @@
             </span>
             {% endif %}
 
-
             <p>
               {{ comment.text }}
             </p>
-
 
             <small>
               Updated:
               {{ comment.updated_at }}
             </small>
 
-
             <div class="comment-actions mt-2">
-
-              <form method="post"
-                    action="{% url 'games:comment-vote' comment.pk 1 %}">
+              <form
+                  method="post"
+                  action="{% url 'games:comment-vote' comment.pk 1 %}">
 
                 {% csrf_token %}
 
@@ -260,12 +234,11 @@
                     class="btn btn-sm btn-outline-success {% if comment.user_vote == 1 %}active-vote{% endif %}">
                   👍 {{ comment.likes_count }}
                 </button>
-
               </form>
 
-
-              <form method="post"
-                    action="{% url 'games:comment-vote' comment.pk -1 %}">
+              <form
+                  method="post"
+                  action="{% url 'games:comment-vote' comment.pk -1 %}">
 
                 {% csrf_token %}
 
@@ -273,61 +246,38 @@
                     class="btn btn-sm btn-outline-danger {% if comment.user_vote == -1 %}active-vote{% endif %}">
                   👎 {{ comment.dislikes_count }}
                 </button>
-
               </form>
-
             </div>
-
           </div>
-
-
         {% empty %}
-
           <p class="text-secondary">
             No comments yet.
           </p>
-
         {% endfor %}
-
       </div>
 
-
       {% include "includes/pagination.html" %}
-
     </div>
-
 
     <a
         href="{% url 'games:game-list' %}"
         class="back-button">
       ← Back to games
     </a>
-
   </div>
 {% endblock %}
 
-
 {% block extra_js %}
-
   <script>
-
       function toggleCollectionForm() {
-          const form = document.getElementById("collection-form");
-
-          form.classList.toggle("show");
+          document.getElementById("collection-form").classList.toggle("show");
       }
-
 
       function toggleEditComment() {
           const form = document.getElementById("edit-comment");
-
-          if (form.style.display === "block") {
-              form.style.display = "none";
-          } else {
-              form.style.display = "block";
-          }
+          form.style.display = form.style.display === "block"
+              ? "none"
+              : "block";
       }
-
   </script>
-
 {% endblock %}

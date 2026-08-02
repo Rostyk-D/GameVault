@@ -2,7 +2,8 @@ from django.contrib.auth.mixins import (
     LoginRequiredMixin,
     UserPassesTestMixin,
 )
-from django.db.models import Count, Q
+from django.core.paginator import Paginator
+from django.db.models import Count, Q, Prefetch
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import generic
@@ -11,7 +12,7 @@ from games.models import Game
 
 from game_collections.forms import (
     GameCollectionForm,
-    GameSearchForm,
+    SearchForm,
 )
 
 from game_collections.models import (
@@ -29,34 +30,55 @@ class GameCollectionListView(generic.ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        return (
+        queryset = (
             GameCollection.objects
             .filter(is_public=True)
             .annotate(
                 reputation=(
-                        Count(
-                            "collection_votes",
-                            filter=Q(
-                                collection_votes__value=1
-                            )
+                    Count(
+                        "collection_votes",
+                        filter=Q(
+                            collection_votes__value=1
                         )
-                        -
-                        Count(
-                            "collection_votes",
-                            filter=Q(
-                                collection_votes__value=-1
-                            )
+                    )
+                    -
+                    Count(
+                        "collection_votes",
+                        filter=Q(
+                            collection_votes__value=-1
                         )
+                    )
                 )
             )
             .select_related(
                 "owner"
             )
-            .order_by(
-                "-reputation",
-                "-created_at",
-            )
         )
+
+        query = self.request.GET.get("query")
+
+        if query:
+            queryset = queryset.filter(
+                Q(title__icontains=query)
+                |
+                Q(description__icontains=query)
+                |
+                Q(owner__username__icontains=query)
+            )
+
+        return queryset.order_by(
+            "-reputation",
+            "-created_at",
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["search_form"] = SearchForm(
+            self.request.GET or None
+        )
+
+        return context
 
 
 class GameCollectionDetailView(generic.DetailView):
@@ -65,13 +87,84 @@ class GameCollectionDetailView(generic.DetailView):
     context_object_name = "collection"
 
     def get_queryset(self):
+        user = self.request.user
+
+        votes_prefetch = Prefetch(
+            "recommendation_votes",
+            queryset=(
+                RecommendationVote.objects.filter(
+                    user=user,
+                )
+                if user.is_authenticated
+                else RecommendationVote.objects.none()
+            ),
+            to_attr="user_votes",
+        )
+
         return (
             GameCollection.objects
             .select_related(
-                "owner"
+                "owner",
             )
             .prefetch_related(
-                "collection_games__game"
+                Prefetch(
+                    "collection_games",
+                    queryset=(
+                        CollectionGame.objects
+                        .select_related(
+                            "game",
+                        )
+                        .prefetch_related(
+                            votes_prefetch,
+                        )
+                        .annotate(
+                            helpful_count=Count(
+                                "recommendation_votes",
+                                filter=Q(
+                                    recommendation_votes__value=(
+                                        RecommendationVote.HELPFUL
+                                    )
+                                ),
+                                distinct=True,
+                            ),
+                            not_helpful_count=Count(
+                                "recommendation_votes",
+                                filter=Q(
+                                    recommendation_votes__value=(
+                                        RecommendationVote.NOT_HELPFUL
+                                    )
+                                ),
+                                distinct=True,
+                            ),
+                            relevance_score=(
+                                    Count(
+                                        "recommendation_votes",
+                                        filter=Q(
+                                            recommendation_votes__value=(
+                                                RecommendationVote.HELPFUL
+                                            )
+                                        ),
+                                        distinct=True,
+                                    )
+                                    -
+                                    Count(
+                                        "recommendation_votes",
+                                        filter=Q(
+                                            recommendation_votes__value=(
+                                                RecommendationVote.NOT_HELPFUL
+                                            )
+                                        ),
+                                        distinct=True,
+                                    )
+                            ),
+                        )
+                        .order_by(
+                            "-relevance_score",
+                            "-created_at",
+                        )
+                    ),
+                    to_attr="sorted_games",
+                )
             )
         )
 
@@ -79,12 +172,13 @@ class GameCollectionDetailView(generic.DetailView):
         context = super().get_context_data(**kwargs)
 
         collection = self.object
+        user = self.request.user
 
-        if self.request.user.is_authenticated:
+        if user.is_authenticated:
             context["user_vote"] = (
                 CollectionVote.objects
                 .filter(
-                    user=self.request.user,
+                    user=user,
                     collection=collection,
                 )
                 .values_list(
@@ -96,48 +190,42 @@ class GameCollectionDetailView(generic.DetailView):
         else:
             context["user_vote"] = None
 
-        context["search_form"] = GameSearchForm(
-            self.request.GET or None
-        )
+        games = self.object.sorted_games
 
-        games = (
-            collection.collection_games
-            .select_related(
-                "game",
-            )
-            .annotate(
-                helpful_score=(
-                        Count(
-                            "recommendation_votes",
-                            filter=Q(
-                                recommendation_votes__value=1
-                            )
-                        )
-                        -
-                        Count(
-                            "recommendation_votes",
-                            filter=Q(
-                                recommendation_votes__value=-1
-                            )
-                        )
-                )
-            )
-            .order_by(
-                "-helpful_score",
-                "-created_at",
-            )
-        )
+        for item in games:
+            if user.is_authenticated and item.user_votes:
+                item.user_vote = item.user_votes[0].value
+            else:
+                item.user_vote = None
 
         query = self.request.GET.get(
-            "query"
+            "query",
         )
 
         if query:
-            games = games.filter(
-                game__title__icontains=query
-            )
+            games = [
+                item
+                for item in games
+                if query.lower()
+                   in item.game.title.lower()
+            ]
 
-        context["collection_games"] = games
+        paginator = Paginator(
+            games,
+            12
+        )
+
+        page_obj = paginator.get_page(
+            self.request.GET.get("page")
+        )
+
+        context["collection_games"] = page_obj
+        context["page_obj"] = page_obj
+        context["is_paginated"] = page_obj.has_other_pages()
+
+        context["search_form"] = SearchForm(
+            self.request.GET or None,
+        )
 
         return context
 
@@ -213,11 +301,10 @@ class AddGameFromGamePageView(
     generic.View,
 ):
     def post(
-        self,
-        request,
-        game_id,
+            self,
+            request,
+            game_id,
     ):
-
         game = get_object_or_404(
             Game,
             pk=game_id,
@@ -233,7 +320,6 @@ class AddGameFromGamePageView(
         )
 
         for collection in collections:
-
             CollectionGame.objects.get_or_create(
                 collection=collection,
                 game=game,

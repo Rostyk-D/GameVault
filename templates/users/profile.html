@@ -156,8 +156,14 @@
         Steam library synchronization error.
       </p>
     {% elif profile_user.steam_sync_status == "completed" %}
+      <form method="get" class="mb-4">
+        {{ steam_search_form.query }}
+        <button class="btn btn-primary">
+          Search games
+        </button>
+      </form>
       <div class="games-grid">
-        {% for item in profile_user.steam_library.all %}
+        {% for item in steam_library_page %}
           <a href="{% url 'games:game-detail' item.game.pk %}" class="game-card">
             <div class="game-cover">
               {% if item.game.cover %}
@@ -181,6 +187,7 @@
           </p>
         {% endfor %}
       </div>
+      {% include "includes/pagination.html" %}
     {% endif %}
   </div>
 {% endblock %}

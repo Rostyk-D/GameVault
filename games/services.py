@@ -109,24 +109,75 @@ class SteamService:
         return None
 
     @staticmethod
+    def get_steam_reviews(appid):
+        url = (
+            "https://store.steampowered.com/"
+            f"appreviews/{appid}?json=1"
+        )
+
+        try:
+            response = requests.get(
+                url,
+                timeout=15,
+            )
+
+            data = response.json()
+
+            summary = data.get(
+                "query_summary",
+                {}
+            )
+
+            positive = summary.get(
+                "total_positive",
+                0,
+            )
+
+            negative = summary.get(
+                "total_negative",
+                0,
+            )
+
+            total = positive + negative
+
+            score = (
+                round(
+                    positive / total * 100
+                )
+                if total
+                else 0
+            )
+
+            return {
+                "positive": positive,
+                "negative": negative,
+                "score": score,
+            }
+
+        except requests.RequestException:
+            return {
+                "positive": 0,
+                "negative": 0,
+                "score": 0,
+            }
+
+    @staticmethod
     def create_slug(
         title,
-        appid
+        appid,
     ):
         return f"{slugify(title)}-{appid}"
 
     @classmethod
     async def sync_library(
         cls,
-        user
+        user,
     ):
         try:
             user.steam_sync_status = "syncing"
             user.steam_sync_progress = 0
 
-            await sync_to_async(
-                user.save
-            )(
+            await sync_to_async(user.save)(
                 update_fields=[
                     "steam_sync_status",
                     "steam_sync_progress",
@@ -144,9 +195,7 @@ class SteamService:
                 user.steam_sync_status = "completed"
                 user.steam_last_sync = timezone.now()
 
-                await sync_to_async(
-                    user.save
-                )(
+                await sync_to_async(user.save)(
                     update_fields=[
                         "steam_library_status",
                         "steam_sync_status",
@@ -158,9 +207,7 @@ class SteamService:
 
             user.steam_library_status = "public"
 
-            await sync_to_async(
-                user.save
-            )(
+            await sync_to_async(user.save)(
                 update_fields=[
                     "steam_library_status",
                 ]
@@ -169,7 +216,6 @@ class SteamService:
             processed = 0
 
             for steam_game in steam_games:
-
                 appid = steam_game.get(
                     "appid"
                 )
@@ -195,7 +241,7 @@ class SteamService:
 
                 developers = details.get(
                     "developers",
-                    []
+                    [],
                 )
 
                 if developers:
@@ -209,8 +255,8 @@ class SteamService:
                     "name",
                     steam_game.get(
                         "name",
-                        "Unknown"
-                    )
+                        "Unknown",
+                    ),
                 )
 
                 game, _ = await sync_to_async(
@@ -223,20 +269,39 @@ class SteamService:
                             title,
                             appid,
                         ),
-                    }
+                    },
                 )
 
                 game.title = title
+
                 game.description = details.get(
                     "short_description",
-                    ""
+                    "",
                 )
 
                 game.cover = await sync_to_async(
                     cls.get_cover
                 )(
                     appid,
-                    details
+                    details,
+                )
+
+                steam_reviews = await sync_to_async(
+                    cls.get_steam_reviews
+                )(
+                    appid
+                )
+
+                game.steam_positive_reviews = (
+                    steam_reviews["positive"]
+                )
+
+                game.steam_negative_reviews = (
+                    steam_reviews["negative"]
+                )
+
+                game.steam_review_score = (
+                    steam_reviews["score"]
                 )
 
                 game.developer = developer
@@ -247,7 +312,7 @@ class SteamService:
 
                 for genre in details.get(
                     "genres",
-                    []
+                    [],
                 ):
                     genre_obj, _ = await sync_to_async(
                         Genre.objects.get_or_create
@@ -269,29 +334,25 @@ class SteamService:
                     defaults={
                         "playtime_forever": steam_game.get(
                             "playtime_forever",
-                            0
+                            0,
                         )
-                    }
+                    },
                 )
 
                 processed += 1
 
                 user.steam_sync_progress = processed
 
-                await sync_to_async(
-                    user.save
-                )(
+                await sync_to_async(user.save)(
                     update_fields=[
-                        "steam_sync_progress"
+                        "steam_sync_progress",
                     ]
                 )
 
             user.steam_sync_status = "completed"
             user.steam_last_sync = timezone.now()
 
-            await sync_to_async(
-                user.save
-            )(
+            await sync_to_async(user.save)(
                 update_fields=[
                     "steam_sync_status",
                     "steam_last_sync",
@@ -301,10 +362,8 @@ class SteamService:
         except Exception:
             user.steam_sync_status = "error"
 
-            await sync_to_async(
-                user.save
-            )(
+            await sync_to_async(user.save)(
                 update_fields=[
-                    "steam_sync_status"
+                    "steam_sync_status",
                 ]
             )

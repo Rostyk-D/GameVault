@@ -9,11 +9,11 @@ from django.contrib.auth.mixins import (
     LoginRequiredMixin,
     UserPassesTestMixin,
 )
-from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import generic
+from django.core.paginator import Paginator
 
 from games.models import Game, UserGame
 from games.services import SteamService
@@ -21,6 +21,7 @@ from users.forms import (
     UserRegistrationForm,
     UserLoginForm,
     UserProfileForm,
+    SteamLibrarySearchForm,
 )
 from users.models import User
 
@@ -95,30 +96,64 @@ class ProfileDetailView(
 
     def get_object(self):
         return get_object_or_404(
-            User.objects.prefetch_related(
-                Prefetch(
-                    "steam_library",
-                    queryset=UserGame.objects.select_related(
-                        "game"
-                    ).order_by(
-                        "-playtime_forever"
-                    )
-                )
-            ),
+            User,
             pk=self.kwargs["pk"]
         )
 
     def get_context_data(
-        self,
-        **kwargs
+            self,
+            **kwargs
     ):
         context = super().get_context_data(
             **kwargs
         )
+
         if self.request.user == self.object:
             context["form"] = UserProfileForm(
                 instance=self.object
             )
+
+        steam_library = (
+            UserGame.objects
+            .filter(
+                user=self.object
+            )
+            .select_related(
+                "game"
+            )
+            .order_by(
+                "-playtime_forever"
+            )
+        )
+
+        query = self.request.GET.get("query")
+
+        if query:
+            steam_library = steam_library.filter(
+                game__title__icontains=query
+            )
+
+        steam_library = steam_library.order_by(
+            "-playtime_forever"
+        )
+
+        context["steam_search_form"] = SteamLibrarySearchForm(
+            self.request.GET or None
+        )
+
+        paginator = Paginator(
+            steam_library,
+            12
+        )
+
+        page_obj = paginator.get_page(
+            self.request.GET.get("page")
+        )
+
+        context["steam_library_page"] = page_obj
+        context["page_obj"] = page_obj
+        context["is_paginated"] = page_obj.has_other_pages()
+
         return context
 
 
@@ -134,13 +169,13 @@ class ProfileUpdateView(
 
     def test_func(self):
         return (
-            self.request.user ==
-            self.get_object()
+                self.request.user ==
+                self.get_object()
         )
 
     def get_context_data(
-        self,
-        **kwargs
+            self,
+            **kwargs
     ):
         context = super().get_context_data(
             **kwargs
@@ -157,16 +192,16 @@ class ProfileUpdateView(
         )
 
     def form_valid(
-        self,
-        form
+            self,
+            form
     ):
         old_steam_id = self.get_object().steam_id
         response = super().form_valid(
             form
         )
         steam_changed = (
-            self.object.steam_id
-            and self.object.steam_id != old_steam_id
+                self.object.steam_id
+                and self.object.steam_id != old_steam_id
         )
         if steam_changed:
             self.object.steam_sync_status = "waiting"
@@ -190,9 +225,9 @@ class UpdateSteamLibraryView(
     generic.View
 ):
     def post(
-        self,
-        request,
-        pk
+            self,
+            request,
+            pk
     ):
         user = request.user
         if not user.steam_id:
@@ -205,12 +240,12 @@ class UpdateSteamLibraryView(
                 pk=user.pk
             )
         if (
-            user.steam_last_update_request
-            and timezone.now()
-            -
-            user.steam_last_update_request
-            <
-            timedelta(minutes=10)
+                user.steam_last_update_request
+                and timezone.now()
+                -
+                user.steam_last_update_request
+                <
+                timedelta(minutes=10)
         ):
             messages.warning(
                 request,

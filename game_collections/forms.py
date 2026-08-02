@@ -37,14 +37,14 @@ class GameCollectionForm(forms.ModelForm):
         }
 
 
-class GameSearchForm(forms.Form):
+class SearchForm(forms.Form):
     query = forms.CharField(
         required=False,
         label="",
         widget=forms.TextInput(
             attrs={
                 "class": "form-field",
-                "placeholder": "Search game...",
+                "placeholder": "Search...",
             }
         ),
     )

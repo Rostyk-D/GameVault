@@ -1,0 +1,126 @@
+.collections-page {
+    max-width: 75rem;
+    margin: 0 auto;
+}
+
+.collections-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.create-collection-btn {
+    padding: .55rem 1rem;
+    background: var(--accent-color);
+    color: white;
+    text-decoration: none;
+    border-radius: .6rem;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.create-collection-btn:hover {
+    color: white;
+    transform: translateY(-.15rem);
+}
+
+.collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: 1.25rem;
+}
+
+.collection-card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.collection-card {
+    height: 100%;
+    background: var(--bg-card);
+    border: .06rem solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    transition: var(--transition);
+}
+
+.collection-card:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-.25rem);
+}
+
+.collection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.collection-header h3 {
+    margin: 0;
+    color: var(--text-main);
+    font-size: 1.25rem;
+    font-weight: 750;
+}
+
+.collection-rating {
+    background: var(--bg-main);
+    border: .06rem solid var(--border-color);
+    border-radius: .5rem;
+    padding: .25rem .55rem;
+    color: #ffc107;
+    font-weight: 700;
+    font-size: .85rem;
+    white-space: nowrap;
+}
+
+.collection-description {
+    min-height: 3rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 1.2rem;
+}
+
+.collection-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .8rem;
+    padding-top: 1rem;
+    border-top: .06rem solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: .85rem;
+}
+
+.empty-text {
+    width: 100%;
+    padding: 2rem;
+    text-align: center;
+    background: var(--bg-card);
+    border: .06rem dashed var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-secondary);
+}
+
+@media (max-width: 48rem) {
+    .collections-top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .create-collection-btn {
+        text-align: center;
+    }
+
+    .collection-header {
+        flex-direction: column;
+    }
+}

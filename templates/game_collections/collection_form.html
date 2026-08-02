@@ -1,0 +1,98 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}
+  Create Collection | GameVault
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/collection_form.css' %}">
+{% endblock %}
+
+{% block content %}
+
+  <div class="collection-form-page">
+
+    <div class="collection-form-card">
+
+      <h1>
+        🎮 Create Collection
+      </h1>
+
+      <p class="text-secondary mb-4">
+        Create your own game collection and share your recommendations.
+      </p>
+
+      <form method="post">
+
+        {% csrf_token %}
+
+        {% for field in form %}
+
+          {% if field.name == "is_public" %}
+
+            <div class="checkbox-field">
+
+              {{ field }}
+
+              <label for="{{ field.id_for_label }}">
+                {{ field.label }}
+              </label>
+
+            </div>
+
+          {% else %}
+
+            <div class="form-group">
+
+              <label for="{{ field.id_for_label }}">
+                {{ field.label }}
+              </label>
+
+              {{ field }}
+
+              {% if field.help_text %}
+                <small class="text-secondary">
+                  {{ field.help_text }}
+                </small>
+              {% endif %}
+
+              {% for error in field.errors %}
+                <div class="text-danger small mt-1">
+                  {{ error }}
+                </div>
+              {% endfor %}
+
+            </div>
+
+          {% endif %}
+
+        {% endfor %}
+
+
+        <div class="collection-form-actions">
+
+          <button
+              type="submit"
+              class="collection-save-button"
+          >
+            Save Collection
+          </button>
+
+
+          <a
+              href="{% url 'game_collections:list' %}"
+              class="collection-cancel-button"
+          >
+            Cancel
+          </a>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+{% endblock %}

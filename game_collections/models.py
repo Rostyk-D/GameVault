@@ -27,10 +27,6 @@ class GameCollection(models.Model):
         default=0,
     )
 
-    likes = models.PositiveIntegerField(
-        default=0,
-    )
-
     created_at = models.DateTimeField(
         auto_now_add=True,
     )
@@ -42,11 +38,13 @@ class GameCollection(models.Model):
     games = models.ManyToManyField(
         Game,
         through="CollectionGame",
-        related_name="game_collections",
+        related_name="collections",
     )
 
     class Meta:
-        ordering = ["-created_at"]
+        ordering = [
+            "-created_at",
+        ]
 
     def __str__(self):
         return self.title
@@ -65,16 +63,74 @@ class CollectionGame(models.Model):
         related_name="collection_games",
     )
 
-    order = models.PositiveIntegerField(
+    position = models.PositiveIntegerField(
         default=0,
     )
 
-    rating = models.PositiveSmallIntegerField(
+    author_rating = models.PositiveSmallIntegerField(
         default=5,
+        help_text="Author rating of this game in collection (1-5)",
     )
 
     recommendation = models.TextField(
-        help_text="Why should I play this?",
+        blank=True,
+        help_text="Why should I play this game?",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        ordering = [
+            "position",
+            "-created_at",
+        ]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "collection",
+                    "game",
+                ],
+                name="unique_game_in_collection",
+            )
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.collection.title} - "
+            f"{self.game.title}"
+        )
+
+
+class CollectionVote(models.Model):
+    LIKE = 1
+    DISLIKE = -1
+
+    VOTE_CHOICES = (
+        (LIKE, "Like"),
+        (DISLIKE, "Dislike"),
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="collection_votes",
+    )
+
+    collection = models.ForeignKey(
+        GameCollection,
+        on_delete=models.CASCADE,
+        related_name="collection_votes",
+    )
+
+    value = models.SmallIntegerField(
+        choices=VOTE_CHOICES,
     )
 
     created_at = models.DateTimeField(
@@ -82,20 +138,33 @@ class CollectionGame(models.Model):
     )
 
     class Meta:
-        ordering = ["order"]
-
         constraints = [
             models.UniqueConstraint(
-                fields=["collection", "game"],
-                name="unique_game_in_collection",
+                fields=[
+                    "user",
+                    "collection",
+                ],
+                name="unique_collection_vote",
             )
         ]
 
     def __str__(self):
-        return f"{self.collection} - {self.game}"
+        return (
+            f"{self.user.username} - "
+            f"{self.collection.title} - "
+            f"{self.value}"
+        )
 
 
 class RecommendationVote(models.Model):
+    HELPFUL = 1
+    NOT_HELPFUL = -1
+
+    VOTE_CHOICES = (
+        (HELPFUL, "Helpful"),
+        (NOT_HELPFUL, "Not helpful"),
+    )
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -105,10 +174,12 @@ class RecommendationVote(models.Model):
     collection_game = models.ForeignKey(
         CollectionGame,
         on_delete=models.CASCADE,
-        related_name="votes",
+        related_name="recommendation_votes",
     )
 
-    is_helpful = models.BooleanField()
+    value = models.SmallIntegerField(
+        choices=VOTE_CHOICES,
+    )
 
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -117,7 +188,17 @@ class RecommendationVote(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "collection_game"],
+                fields=[
+                    "user",
+                    "collection_game",
+                ],
                 name="unique_recommendation_vote",
             )
         ]
+
+    def __str__(self):
+        return (
+            f"{self.user.username} - "
+            f"{self.collection_game.game.title} - "
+            f"{self.value}"
+        )

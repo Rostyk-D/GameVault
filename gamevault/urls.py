@@ -27,6 +27,7 @@ urlpatterns = [
     path("users/", include("users.urls")),
     path("users/", include("django.contrib.auth.urls")),
     path("games/", include("games.urls")),
+    path("collections/", include("game_collections.urls")),
 ]
 
 urlpatterns += static(

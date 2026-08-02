@@ -1,22 +1,17 @@
 :root {
     --bg-main: #0f1115;
     --bg-card: #171a21;
-
     --text-main: #ffffff;
     --text-secondary: #9aa4b2;
-
     --border-color: #2a2f3a;
-
     --accent-color: #0d6efd;
-
     --border-radius: 0.75rem;
-
     --transition: 0.3s;
 }
 
 body {
-    background-color: var(--bg-main);
-    color: var(--text-main);
+    background-color: var(--bg-main) !important;
+    color: var(--text-main) !important;
 }
 
 .card {
@@ -30,4 +25,114 @@ body {
 
 .btn {
     border-radius: var(--border-radius);
+}
+
+
+.form-field,
+.form-control,
+textarea.form-field,
+input.form-field,
+select.form-field {
+
+    width: 100%;
+
+    padding: .75rem 1rem;
+
+    background-color: var(--bg-card) !important;
+
+    border: 1px solid var(--border-color) !important;
+
+    border-radius: var(--border-radius);
+
+    color: var(--text-main) !important;
+
+    transition: var(--transition);
+}
+
+
+.form-field::placeholder,
+.form-control::placeholder {
+
+    color: var(--text-secondary) !important;
+
+    opacity: 1;
+}
+
+
+.form-field:hover,
+.form-control:hover {
+
+    border-color: rgba(13, 110, 253, .5) !important;
+}
+
+
+.form-field:focus,
+.form-control:focus {
+
+    background-color: var(--bg-card) !important;
+
+    color: var(--text-main) !important;
+
+    border-color: var(--accent-color) !important;
+
+    outline: none;
+
+    box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .25) !important;
+}
+
+
+textarea.form-field {
+    resize: vertical;
+    min-height: 120px;
+}
+
+
+label {
+
+    color: var(--text-main);
+
+    font-weight: 600;
+
+    margin-bottom: .5rem;
+}
+
+
+.form-check-input {
+
+    width: 18px;
+
+    height: 18px;
+
+    background-color: var(--bg-main) !important;
+
+    border: 1px solid var(--border-color) !important;
+
+    cursor: pointer;
+}
+
+
+.form-check-input:checked {
+
+    background-color: var(--accent-color) !important;
+
+    border-color: var(--accent-color) !important;
+}
+
+
+.form-check-label {
+
+    color: var(--text-main);
+
+    cursor: pointer;
+}
+
+
+.form-field:-webkit-autofill,
+.form-field:-webkit-autofill:hover,
+.form-field:-webkit-autofill:focus {
+
+    -webkit-text-fill-color: var(--text-main) !important;
+
+    box-shadow: 0 0 0 1000px var(--bg-card) inset !important;
+
 }

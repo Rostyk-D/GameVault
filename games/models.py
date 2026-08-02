@@ -48,6 +48,19 @@ class Game(models.Model):
         null=True,
     )
 
+    steam_positive_reviews = models.PositiveIntegerField(
+        default=0,
+    )
+
+    steam_negative_reviews = models.PositiveIntegerField(
+        default=0,
+    )
+
+    steam_review_score = models.PositiveIntegerField(
+        default=0,
+        help_text="Steam review score percentage",
+    )
+
     release_date = models.DateField(
         blank=True,
         null=True,

@@ -1,0 +1,199 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}
+  {{ collection.title }} | GameVault
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/collections.css' %}">
+{% endblock %}
+
+{% block content %}
+
+  <div class="collection-detail">
+
+    <div class="collection-card mb-4">
+
+      <h1>
+        {{ collection.title }}
+      </h1>
+
+      <p class="text-secondary">
+        {{ collection.description }}
+      </p>
+
+      <div class="collection-meta">
+
+      <span>
+        👤 {{ collection.owner.username }}
+      </span>
+
+        <span>
+        🎮 {{ collection.games.count }}
+      </span>
+
+      </div>
+
+
+      {% if user.is_authenticated %}
+
+        <div class="vote-buttons mt-3">
+
+          <form method="post"
+                action="{% url 'game_collections:vote' collection.pk 1 %}">
+
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="btn {% if user_vote == 1 %}btn-success{% else %}btn-outline-success{% endif %}"
+            >
+              👍 Like
+            </button>
+
+          </form>
+
+
+          <form method="post"
+                action="{% url 'game_collections:vote' collection.pk -1 %}">
+
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="btn {% if user_vote == -1 %}btn-danger{% else %}btn-outline-danger{% endif %}"
+            >
+              👎 Dislike
+            </button>
+
+          </form>
+
+        </div>
+
+      {% endif %}
+
+    </div>
+
+
+    <div class="collection-header">
+
+      <h2 class="section-title">
+        🎮 Games
+      </h2>
+
+      <div class="collection-actions">
+
+        {% if user == collection.owner %}
+
+          <a
+              href="{% url 'games:game-list' %}"
+              class="btn btn-success"
+          >
+            Add game from catalog
+          </a>
+
+        {% endif %}
+
+        <a
+            href="{% url 'game_collections:list' %}"
+            class="btn btn-primary"
+        >
+          Back to collections
+        </a>
+
+      </div>
+
+    </div>
+
+    <div class="collection-games">
+
+      {% for item in collection_games %}
+
+        <div class="collection-game-card">
+
+          <img
+              src="{{ item.game.cover|default:'/static/images/default-game.png' }}"
+              alt="{{ item.game.title }}"
+          >
+
+
+          <div class="collection-game-body">
+
+            <h4>
+              {{ item.game.title }}
+            </h4>
+
+
+            <p>
+              ⭐ Rating:
+              {{ item.rating }}/5
+            </p>
+
+
+            {% if item.recommendation %}
+
+              <p class="text-secondary">
+                "{{ item.recommendation }}"
+              </p>
+
+            {% endif %}
+
+
+            <div class="helpful-buttons">
+
+
+              <form method="post"
+                    action="{% url 'game_collections:recommendation-vote' item.pk 1 %}">
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="btn btn-sm btn-outline-success"
+                >
+                  👍 Helpful
+                </button>
+
+              </form>
+
+
+              <form method="post"
+                    action="{% url 'game_collections:recommendation-vote' item.pk -1 %}">
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="btn btn-sm btn-outline-danger"
+                >
+                  👎 Not helpful
+                </button>
+
+              </form>
+
+
+            </div>
+
+
+          </div>
+
+
+        </div>
+
+
+      {% empty %}
+
+        <p class="empty-text">
+          No games in collection.
+        </p>
+
+
+      {% endfor %}
+
+
+    </div>
+
+  </div>
+
+{% endblock %}

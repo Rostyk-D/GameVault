@@ -1,0 +1,100 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}
+  Collections | GameVault
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/collections.css' %}">
+{% endblock %}
+
+
+{% block content %}
+
+  <h1 class="page-title">
+    🎮 Collections
+  </h1>
+
+
+  {% if user.is_authenticated %}
+
+    <a href="{% url 'game_collections:create' %}"
+       class="btn btn-primary mb-4">
+      + Create Collection
+    </a>
+
+  {% endif %}
+
+
+  <div class="collections-grid">
+
+
+    {% for collection in collections %}
+
+      <a href="{% url 'game_collections:detail' collection.pk %}"
+         class="collection-card-link">
+
+
+        <div class="collection-card">
+
+
+          <div class="collection-header">
+
+            <h3>
+              {{ collection.title }}
+            </h3>
+
+            <div class="collection-rating">
+
+              👍 {{ collection.reputation }}
+
+            </div>
+
+          </div>
+
+
+          <p>
+            {{ collection.description|truncatewords:20 }}
+          </p>
+
+
+          <div class="collection-meta">
+
+<span>
+👤 {{ collection.owner.username }}
+</span>
+
+            <span>
+🎮 {{ collection.games.count }} games
+</span>
+
+            <span>
+👁 {{ collection.views }}
+</span>
+
+          </div>
+
+
+        </div>
+
+
+      </a>
+
+
+    {% empty %}
+
+      <p class="empty-text">
+        No collections yet.
+      </p>
+
+    {% endfor %}
+
+
+  </div>
+
+
+  {% include "includes/pagination.html" %}
+
+
+{% endblock %}

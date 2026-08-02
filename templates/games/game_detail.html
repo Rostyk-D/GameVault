@@ -28,7 +28,6 @@
         <h1>{{ game.title }}</h1>
 
         <div class="game-info">
-
           {% if game.developer %}
             <p>
               Developer:
@@ -49,7 +48,6 @@
               <strong>{{ game.steam_appid }}</strong>
             </p>
           {% endif %}
-
         </div>
 
         <div class="genre-list detail-genres">
@@ -63,6 +61,77 @@
           </span>
           {% endfor %}
         </div>
+
+        {% if user.is_authenticated %}
+
+          <div class="collection-action">
+
+            <button
+                type="button"
+                class="btn btn-success add-collection-btn"
+                onclick="toggleCollectionForm()">
+              ➕ Add to collection
+            </button>
+
+            <form
+                method="post"
+                action="{% url 'game_collections:add-game-from-page' game.id %}"
+                id="collection-form"
+                class="collection-form">
+
+              {% csrf_token %}
+
+              <h5>
+                Select collections
+              </h5>
+
+              <div class="collection-checkboxes">
+
+                {% for collection in user_collections %}
+
+                  <label class="collection-check {% if collection.has_game %}disabled{% endif %}">
+
+                    <input
+                        type="checkbox"
+                        name="collections"
+                        value="{{ collection.id }}"
+                        {% if collection.has_game %}checked disabled{% endif %}
+                    >
+
+                    <span>
+                  {{ collection.title }}
+                </span>
+
+                    {% if collection.has_game %}
+                      <small>
+                        Added
+                      </small>
+                    {% endif %}
+
+                  </label>
+
+                {% empty %}
+
+                  <p class="text-secondary">
+                    You don't have collections yet.
+                  </p>
+
+                {% endfor %}
+
+              </div>
+
+              <button
+                  type="submit"
+                  class="btn btn-primary mt-3">
+                Add
+              </button>
+
+            </form>
+
+          </div>
+
+        {% endif %}
+
 
         <div class="game-description">
 
@@ -93,20 +162,22 @@
         Comments
       </h3>
 
+
       {% if user.is_authenticated %}
 
         {% if not user_comment %}
 
-          <form method="post" action="{% url 'games:game-detail' game.pk %}">
+          <form method="post">
 
             {% csrf_token %}
 
-            {{ comment_form }}
+            <div class="comment-form">
+              {{ comment_form }}
+            </div>
 
             <button
                 type="submit"
-                class="btn btn-primary mt-3"
-            >
+                class="btn btn-primary mt-3">
               Save comment
             </button>
 
@@ -116,16 +187,15 @@
 
           <button
               class="btn btn-outline-primary mb-3"
-              onclick="document.getElementById('edit-comment').style.display='block'; this.style.display='none';"
-          >
+              onclick="toggleEditComment()">
             Edit my comment
           </button>
+
 
           <form
               method="post"
               id="edit-comment"
-              style="display:none;"
-          >
+              class="edit-comment">
 
             {% csrf_token %}
 
@@ -133,8 +203,7 @@
 
             <button
                 type="submit"
-                class="btn btn-success mt-3"
-            >
+                class="btn btn-success mt-3">
               Update comment
             </button>
 
@@ -161,51 +230,47 @@
               {{ comment.user.username }}
             </strong>
 
+
             {% if comment == user_comment %}
               <span class="badge bg-primary">
               You
             </span>
             {% endif %}
 
+
             <p>
               {{ comment.text }}
             </p>
+
 
             <small>
               Updated:
               {{ comment.updated_at }}
             </small>
 
+
             <div class="comment-actions mt-2">
 
-              <form
-                  method="post"
-                  action="{% url 'games:comment-vote' comment.pk 1 %}"
-                  style="display:inline;"
-              >
+              <form method="post"
+                    action="{% url 'games:comment-vote' comment.pk 1 %}">
+
                 {% csrf_token %}
 
                 <button
-                    type="submit"
-                    class="btn btn-sm btn-outline-success {% if comment.user_vote == 1 %}active-vote{% endif %}"
-                >
+                    class="btn btn-sm btn-outline-success {% if comment.user_vote == 1 %}active-vote{% endif %}">
                   👍 {{ comment.likes_count }}
                 </button>
 
               </form>
 
 
-              <form
-                  method="post"
-                  action="{% url 'games:comment-vote' comment.pk -1 %}"
-                  style="display:inline;"
-              >
+              <form method="post"
+                    action="{% url 'games:comment-vote' comment.pk -1 %}">
+
                 {% csrf_token %}
 
                 <button
-                    type="submit"
-                    class="btn btn-sm btn-outline-danger {% if comment.user_vote == -1 %}active-vote{% endif %}"
-                >
+                    class="btn btn-sm btn-outline-danger {% if comment.user_vote == -1 %}active-vote{% endif %}">
                   👎 {{ comment.dislikes_count }}
                 </button>
 
@@ -214,6 +279,7 @@
             </div>
 
           </div>
+
 
         {% empty %}
 
@@ -233,10 +299,35 @@
 
     <a
         href="{% url 'games:game-list' %}"
-        class="back-button"
-    >
+        class="back-button">
       ← Back to games
     </a>
 
   </div>
+{% endblock %}
+
+
+{% block extra_js %}
+
+  <script>
+
+      function toggleCollectionForm() {
+          const form = document.getElementById("collection-form");
+
+          form.classList.toggle("show");
+      }
+
+
+      function toggleEditComment() {
+          const form = document.getElementById("edit-comment");
+
+          if (form.style.display === "block") {
+              form.style.display = "none";
+          } else {
+              form.style.display = "block";
+          }
+      }
+
+  </script>
+
 {% endblock %}

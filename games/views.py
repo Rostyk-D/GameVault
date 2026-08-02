@@ -7,6 +7,7 @@ from django.views import generic
 
 from games.forms import GameSearchForm, GameCommentForm
 from games.models import Game, GameComment, CommentVote
+from game_collections.models import GameCollection
 
 
 class GameListView(generic.ListView):
@@ -91,9 +92,24 @@ class GameDetailView(generic.DetailView):
             context["comment_form"] = GameCommentForm(
                 instance=user_comment
             )
+
+            collections = (
+                GameCollection.objects
+                .filter(owner=user)
+                .prefetch_related("games")
+            )
+
+            for collection in collections:
+                collection.has_game = collection.games.filter(
+                    pk=self.object.pk
+                ).exists()
+
+            context["user_collections"] = collections
+
         else:
             context["user_comment"] = None
             context["comment_form"] = None
+            context["user_collections"] = []
 
         comments = (
             self.object.comments

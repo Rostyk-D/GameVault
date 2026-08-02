@@ -5,10 +5,8 @@
 
 .game-detail-card {
     background: var(--bg-card);
-
     border: 1px solid var(--border-color);
     border-radius: 1rem;
-
     overflow: hidden;
     transition: .2s;
 }
@@ -20,7 +18,6 @@
 .game-detail-cover {
     width: 100%;
     aspect-ratio: 460 / 215;
-
     overflow: hidden;
     background: #111;
 }
@@ -28,9 +25,12 @@
 .game-detail-cover img {
     width: 100%;
     height: 100%;
-
     object-fit: cover;
     transition: .25s;
+}
+
+.game-detail-cover img:hover {
+    transform: scale(1.03);
 }
 
 .game-detail-body {
@@ -68,9 +68,7 @@
 
 .game-description p {
     color: var(--text-secondary);
-
     line-height: 1.7;
-
 }
 
 .back-button {
@@ -78,20 +76,97 @@
     margin-top: 2rem;
     padding: .7rem 1.2rem;
     border-radius: var(--border-radius);
-
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     color: var(--text-main);
     text-decoration: none;
-
     transition: .2s;
 }
 
 .back-button:hover {
     border-color: var(--accent-color);
     color: var(--text-main);
-
     transform: translateY(-3px);
+}
+
+.collection-action {
+    margin-top: 1.5rem;
+}
+
+.add-collection-btn {
+    border-radius: .7rem;
+    padding: .55rem 1.2rem;
+    font-weight: 600;
+    transition: .2s;
+}
+
+.add-collection-btn:hover {
+    transform: translateY(-2px);
+}
+
+.collection-form {
+    display: none;
+    margin-top: 1rem;
+    padding: 1.2rem;
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: .8rem;
+    max-width: 420px;
+}
+
+.collection-form.show {
+    display: block;
+}
+
+.collection-form h5 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.collection-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+}
+
+.collection-check {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .7rem .8rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: .6rem;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.collection-check:hover {
+    border-color: var(--accent-color);
+}
+
+.collection-check input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.collection-check span {
+    color: var(--text-main);
+}
+
+.collection-check small {
+    margin-left: auto;
+    color: var(--text-secondary);
+}
+
+.collection-check.disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.collection-check.disabled:hover {
+    border-color: var(--border-color);
 }
 
 .game-comments {
@@ -102,48 +177,99 @@
 
 .game-comments h3 {
     font-weight: 700;
-
     margin-bottom: 1.5rem;
+}
+
+.comment-form textarea,
+.edit-comment textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: .7rem;
+    color: var(--text-main);
+    resize: vertical;
+}
+
+.comment-form textarea:focus,
+.edit-comment textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.edit-comment {
+    display: none;
 }
 
 .comment-card {
     background: var(--bg-main);
-
     border: 1px solid var(--border-color);
-    border-radius: 0.75rem;
+    border-radius: .75rem;
     padding: 1rem;
     margin-bottom: 1rem;
 }
 
+.comment-card strong {
+    color: var(--text-main);
+}
+
 .comment-card p {
     margin-top: .5rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
 
+.comment-card small {
     color: var(--text-secondary);
 }
 
-.comment-actions button {
-    transition: 0.2s ease;
+.comment-actions {
+    display: flex;
+    gap: .5rem;
 }
 
+.comment-actions form {
+    display: inline;
+}
+
+.comment-actions button {
+    transition: .2s;
+}
 
 .comment-actions button:hover {
     transform: scale(1.05);
 }
-
 
 .comment-actions .active-vote {
     color: white;
     font-weight: bold;
 }
 
-
 .comment-actions .btn-outline-success.active-vote {
     background-color: #198754;
     border-color: #198754;
 }
 
-
 .comment-actions .btn-outline-danger.active-vote {
     background-color: #dc3545;
     border-color: #dc3545;
+}
+
+.my-comment {
+    border-color: var(--accent-color);
+}
+
+@media (max-width: 768px) {
+    .game-detail-body {
+        padding: 1.2rem;
+    }
+
+    .game-detail-body h1 {
+        font-size: 1.8rem;
+    }
+
+    .collection-form {
+        max-width: 100%;
+    }
 }

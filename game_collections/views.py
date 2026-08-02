@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import (
     UserPassesTestMixin,
 )
 from django.core.paginator import Paginator
-from django.db.models import Count, Q, Prefetch
+from django.db.models import Count, F, Prefetch, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import generic
@@ -34,22 +34,17 @@ class GameCollectionListView(generic.ListView):
             GameCollection.objects
             .filter(is_public=True)
             .annotate(
-                reputation=(
-                    Count(
-                        "collection_votes",
-                        filter=Q(
-                            collection_votes__value=1
-                        )
-                    )
-                    -
-                    Count(
-                        "collection_votes",
-                        filter=Q(
-                            collection_votes__value=-1
-                        )
-                    )
-                )
+                likes=Count(
+                    "collection_votes",
+                    filter=Q(collection_votes__value=CollectionVote.LIKE),
+                ),
+                dislikes=Count(
+                    "collection_votes",
+                    filter=Q(collection_votes__value=CollectionVote.DISLIKE),
+                ),
+                games_count=Count("collection_games", distinct=True),
             )
+            .annotate(reputation=F("likes") - F("dislikes"))
             .select_related(
                 "owner"
             )
@@ -106,6 +101,7 @@ class GameCollectionDetailView(generic.DetailView):
             .select_related(
                 "owner",
             )
+            .annotate(games_count=Count("collection_games", distinct=True))
             .prefetch_related(
                 Prefetch(
                     "collection_games",
@@ -207,7 +203,7 @@ class GameCollectionDetailView(generic.DetailView):
                 item
                 for item in games
                 if query.lower()
-                   in item.game.title.lower()
+                in item.game.title.lower()
             ]
 
         paginator = Paginator(
@@ -319,11 +315,13 @@ class AddGameFromGamePageView(
             owner=request.user,
         )
 
-        for collection in collections:
-            CollectionGame.objects.get_or_create(
-                collection=collection,
-                game=game,
-            )
+        CollectionGame.objects.bulk_create(
+            [
+                CollectionGame(collection=collection, game=game)
+                for collection in collections
+            ],
+            ignore_conflicts=True,
+        )
 
         return redirect(
             "games:game-detail",

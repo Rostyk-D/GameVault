@@ -1,6 +1,17 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
-from django.db.models import Q, Count, Case, When, Value, IntegerField, F
+from django.db.models import (
+    Case,
+    Count,
+    Exists,
+    F,
+    IntegerField,
+    OuterRef,
+    Prefetch,
+    Q,
+    Value,
+    When,
+)
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import generic
@@ -50,6 +61,13 @@ class GameDetailView(generic.DetailView):
     template_name = "games/game_detail.html"
     context_object_name = "game"
 
+    def get_queryset(self):
+        return (
+            Game.objects
+            .select_related("developer")
+            .prefetch_related("genres")
+        )
+
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
 
@@ -96,13 +114,15 @@ class GameDetailView(generic.DetailView):
             collections = (
                 GameCollection.objects
                 .filter(owner=user)
-                .prefetch_related("games")
+                .annotate(
+                    has_game=Exists(
+                        GameCollection.games.through.objects.filter(
+                            collection_id=OuterRef("pk"),
+                            game_id=self.object.pk,
+                        )
+                    )
+                )
             )
-
-            for collection in collections:
-                collection.has_game = collection.games.filter(
-                    pk=self.object.pk
-                ).exists()
 
             context["user_collections"] = collections
 
@@ -155,16 +175,13 @@ class GameDetailView(generic.DetailView):
             )
 
         if user.is_authenticated:
-            for comment in comments:
-                vote = comment.votes.filter(
-                    user=user
-                ).first()
-
-                comment.user_vote = (
-                    vote.value
-                    if vote
-                    else 0
+            comments = comments.prefetch_related(
+                Prefetch(
+                    "votes",
+                    queryset=CommentVote.objects.filter(user=user),
+                    to_attr="user_votes",
                 )
+            )
 
         paginator = Paginator(
             comments,
@@ -178,6 +195,14 @@ class GameDetailView(generic.DetailView):
         page_obj = paginator.get_page(
             page_number
         )
+
+        if user.is_authenticated:
+            for comment in page_obj:
+                comment.user_vote = (
+                    comment.user_votes[0].value
+                    if comment.user_votes
+                    else 0
+                )
 
         context["comments"] = page_obj
         context["page_obj"] = page_obj

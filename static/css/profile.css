@@ -95,65 +95,67 @@
     color: var(--text-secondary);
 }
 
-.select2-container {
+body .select2-container {
     width: 100% !important;
 }
 
-.select2-container--default .select2-selection--single {
+body .select2-container--default .select2-selection--single {
     background: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
     border-radius: .5rem !important;
+    color: var(--text-secondary) !important;
     height: 42px !important;
 }
 
-.select2-container--default .select2-selection--single .select2-selection__rendered {
+body .select2-container--default .select2-selection--single .select2-selection__rendered {
     color: var(--text-secondary) !important;
     line-height: 40px !important;
     padding-left: 12px !important;
 }
 
-.select2-container--default .select2-selection--single .select2-selection__arrow {
+body .select2-container--default .select2-selection--single .select2-selection__arrow {
     height: 40px !important;
 }
 
-.select2-container--default.select2-container--open .select2-selection--single {
+body .select2-container--default.select2-container--open .select2-selection--single {
     border-color: var(--accent-color) !important;
 }
 
-.select2-dropdown {
+body .select2-dropdown {
     background: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
     border-radius: .5rem !important;
     overflow: hidden;
 }
 
-.select2-search {
+body .select2-search {
     padding: .5rem !important;
 }
 
-.select2-search__field {
+body .select2-search__field {
     background: var(--bg-card) !important;
     color: var(--text-secondary) !important;
     border: 1px solid var(--border-color) !important;
     border-radius: .5rem !important;
 }
 
-.select2-search__field::placeholder {
+body .select2-search__field::placeholder {
     color: var(--text-secondary) !important;
     opacity: .7;
 }
 
-.select2-results__option {
+body .select2-results__option {
+    background-color: var(--bg-card) !important;
     color: var(--text-secondary) !important;
     padding: .7rem 1rem !important;
 }
 
-.select2-results__option--highlighted {
+body .select2-results__option--highlighted {
     background: var(--accent-color) !important;
     color: white !important;
 }
 
-.select2-selection__placeholder {
+body .select2-selection__placeholder {
     color: var(--text-secondary) !important;
 }
 
@@ -169,45 +171,8 @@
     margin: 0;
 }
 
-.games-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1.5rem;
-}
-
-.game-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 1rem;
-    overflow: hidden;
-    text-decoration: none;
-    color: inherit;
-    transition: .2s;
-}
-
-.game-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--accent-color);
-}
-
-.game-cover img {
-    width: 100%;
-    height: 120px;
-    object-fit: cover;
-}
-
-.game-body {
-    padding: 1rem;
-}
-
-.game-body h5 {
+.profile-card .game-body h5 {
     color: var(--text-secondary);
-    font-weight: 700;
-}
-
-.game-body p {
-    color: var(--text-secondary);
-    margin: 0;
 }
 
 .btn-primary {
@@ -230,43 +195,8 @@
     color: white;
 }
 
-body .select2-container--default .select2-selection--single {
-    background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
-    color: var(--text-secondary) !important;
-}
-
-body .select2-container--default .select2-selection--single .select2-selection__rendered {
-    color: var(--text-secondary) !important;
-}
-
-body .select2-container--default .select2-selection--single .select2-selection__placeholder {
-    color: var(--text-secondary) !important;
-}
-
-body .select2-container--default .select2-dropdown {
-    background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
-}
-
 body .select2-container--default .select2-search--dropdown {
     background-color: var(--bg-card) !important;
-}
-
-body .select2-container--default .select2-search__field {
-    background-color: var(--bg-card) !important;
-    color: var(--text-secondary) !important;
-    border: 1px solid var(--border-color) !important;
-}
-
-body .select2-container--default .select2-results__option {
-    background-color: var(--bg-card) !important;
-    color: var(--text-secondary) !important;
-}
-
-body .select2-container--default .select2-results__option--highlighted {
-    background-color: var(--accent-color) !important;
-    color: white !important;
 }
 
 body .select2-container--default .select2-results__option[aria-selected="true"] {

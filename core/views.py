@@ -1,4 +1,4 @@
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.shortcuts import render
 
 from users.models import User
@@ -25,26 +25,10 @@ def home(request):
                 ),
                 distinct=True,
             ),
+            games_count=Count("collection_games", distinct=True),
         )
-        .annotate(
-            reputation=(
-                Count(
-                    "collection_votes",
-                    filter=Q(
-                        collection_votes__value=1
-                    ),
-                    distinct=True,
-                )
-                -
-                Count(
-                    "collection_votes",
-                    filter=Q(
-                        collection_votes__value=-1
-                    ),
-                    distinct=True,
-                )
-            )
-        )
+        .annotate(reputation=F("likes") - F("dislikes"))
+        .select_related("owner")
         .order_by(
             "-reputation",
             "-created_at",
@@ -55,14 +39,9 @@ def home(request):
         GameCollection.objects
         .filter(is_public=True)
         .annotate(
-            likes=Count(
-                "collection_votes",
-                filter=Q(
-                    collection_votes__value=1
-                ),
-                distinct=True,
-            ),
+            games_count=Count("collection_games", distinct=True),
         )
+        .select_related("owner")
         .order_by(
             "-created_at"
         )[:3]

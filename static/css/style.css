@@ -27,12 +27,23 @@ body {
     border-radius: var(--border-radius);
 }
 
+.active-vote {
+    color: white !important;
+}
+
+.btn-outline-success.active-vote {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-outline-danger.active-vote {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
 
 .form-field,
-.form-control,
-textarea.form-field,
-input.form-field,
-select.form-field {
+.form-control {
 
     width: 100%;
 

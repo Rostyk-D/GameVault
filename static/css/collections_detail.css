@@ -160,20 +160,6 @@
     transform: translateY(-0.15rem);
 }
 
-.helpful-buttons .active-vote {
-    color: white;
-}
-
-.helpful-buttons .btn-outline-success.active-vote {
-    background-color: #198754;
-    border-color: #198754;
-}
-
-.helpful-buttons .btn-outline-danger.active-vote {
-    background-color: #dc3545;
-    border-color: #dc3545;
-}
-
 .recommendation-text {
     margin-top: .5rem;
     font-style: italic;

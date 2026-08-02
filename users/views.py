@@ -96,7 +96,7 @@ class ProfileDetailView(
 
     def get_object(self):
         return get_object_or_404(
-            User,
+            User.objects.select_related("favorite_game"),
             pk=self.kwargs["pk"]
         )
 
@@ -132,10 +132,6 @@ class ProfileDetailView(
             steam_library = steam_library.filter(
                 game__title__icontains=query
             )
-
-        steam_library = steam_library.order_by(
-            "-playtime_forever"
-        )
 
         context["steam_search_form"] = SteamLibrarySearchForm(
             self.request.GET or None

@@ -276,19 +276,8 @@
     transform: translateY(-2px);
 }
 
-.active-vote {
-    color: white !important;
+.comment-actions .active-vote {
     font-weight: 700;
-}
-
-.btn-outline-success.active-vote {
-    background: #198754;
-    border-color: #198754;
-}
-
-.btn-outline-danger.active-vote {
-    background: #dc3545;
-    border-color: #dc3545;
 }
 
 .my-comment {

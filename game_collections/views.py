@@ -37,10 +37,12 @@ class GameCollectionListView(generic.ListView):
                 likes=Count(
                     "collection_votes",
                     filter=Q(collection_votes__value=CollectionVote.LIKE),
+                    distinct=True,
                 ),
                 dislikes=Count(
                     "collection_votes",
                     filter=Q(collection_votes__value=CollectionVote.DISLIKE),
+                    distinct=True,
                 ),
                 games_count=Count("collection_games", distinct=True),
             )

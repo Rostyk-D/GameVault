@@ -9,12 +9,17 @@ from django.contrib.auth.mixins import (
     LoginRequiredMixin,
     UserPassesTestMixin,
 )
+from django.db.models import Count, Q, F
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import generic
 from django.core.paginator import Paginator
 
+from game_collections.models import (
+    GameCollection,
+    CollectionVote
+)
 from games.models import Game, UserGame
 from games.services import SteamService
 from users.forms import (
@@ -136,6 +141,28 @@ class ProfileDetailView(
         context["steam_search_form"] = SteamLibrarySearchForm(
             self.request.GET or None
         )
+
+        collections = (
+            GameCollection.objects
+            .filter(owner=self.object)
+            .annotate(
+                likes=Count(
+                    "collection_votes",
+                    filter=Q(collection_votes__value=CollectionVote.LIKE),
+                    distinct=True,
+                ),
+                dislikes=Count(
+                    "collection_votes",
+                    filter=Q(collection_votes__value=CollectionVote.DISLIKE),
+                    distinct=True,
+                ),
+                games_count=Count("collection_games", distinct=True),
+            )
+            .annotate(reputation=F("likes") - F("dislikes"))
+            .order_by("-created_at")
+        )
+
+        context["collections"] = collections
 
         paginator = Paginator(
             steam_library,

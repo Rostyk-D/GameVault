@@ -5,6 +5,7 @@
 {% endblock %}
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/collections_list.css' %}">
   <link rel="stylesheet" href="{% static 'css/games.css' %}">
 {% endblock %}
 {% block content %}
@@ -100,22 +101,40 @@
     <h3>
       My Collections
     </h3>
-    {% if profile_user.gamecollection_set.all %}
-      <div class="collections-list">
-        {% for collection in profile_user.gamecollection_set.all %}
-          <div class="collection-item">
-            <h5>
-              {{ collection.name }}
-            </h5>
-            <p>
-              {{ collection.description|default:"No description" }}
-            </p>
-          </div>
+    {% if collections %}
+      <div class="collections-grid">
+        {% for collection in collections %}
+          <a href="{% url 'game_collections:detail' collection.pk %}"
+             class="collection-card-link">
+
+            <article class="collection-card">
+
+              <div class="collection-header">
+                <h3>{{ collection.title }}</h3>
+
+                <div class="collection-rating">
+                  👍 {{ collection.reputation }}
+                </div>
+              </div>
+
+              <p class="collection-description">
+                {{ collection.description|truncatewords:20 }}
+              </p>
+
+              <div class="collection-meta">
+                <span>👤 {{ collection.owner.username }}</span>
+                <span>🎮 {{ collection.games_count }} games</span>
+                <span>👁 {{ collection.views }}</span>
+              </div>
+
+            </article>
+
+          </a>
         {% endfor %}
       </div>
     {% else %}
       <p class="empty-text">
-        You don't have any collections yet.
+        No collections yet.
       </p>
     {% endif %}
   </div>

@@ -1,4 +1,4 @@
-from django.db.models import Count, F, Q
+from django.db.models import Count, Q
 from django.shortcuts import render
 
 from users.models import User
@@ -10,24 +10,7 @@ def home(request):
     featured_collections = (
         GameCollection.objects
         .filter(is_public=True)
-        .annotate(
-            likes=Count(
-                "collection_votes",
-                filter=Q(
-                    collection_votes__value=1
-                ),
-                distinct=True,
-            ),
-            dislikes=Count(
-                "collection_votes",
-                filter=Q(
-                    collection_votes__value=-1
-                ),
-                distinct=True,
-            ),
-            games_count=Count("collection_games", distinct=True),
-        )
-        .annotate(reputation=F("likes") - F("dislikes"))
+        .with_statistics()
         .select_related("owner")
         .order_by(
             "-reputation",
@@ -38,9 +21,7 @@ def home(request):
     latest_collections = (
         GameCollection.objects
         .filter(is_public=True)
-        .annotate(
-            games_count=Count("collection_games", distinct=True),
-        )
+        .with_statistics()
         .select_related("owner")
         .order_by(
             "-created_at"

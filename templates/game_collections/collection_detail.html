@@ -60,7 +60,7 @@
             Add game from catalog
           </a>
 
-          <a href="{% url 'game_collections:delete' collection.pk %}" class="btn btn-outline-danger">
+          <a href="{% url 'game_collections:delete' collection.slug %}" class="btn btn-outline-danger">
             Delete collection
           </a>
         {% endif %}
@@ -78,7 +78,7 @@
       {% for item in collection_games %}
         <div class="collection-game-card">
 
-          <a href="{% url 'games:game-detail' item.game.pk %}" class="collection-game-link">
+          <a href="{% url 'games:game-detail' item.game.slug %}" class="collection-game-link">
             <img
                 src="{{ item.game.cover|default:'/static/images/default-game.png' }}"
                 alt="{{ item.game.title }}">

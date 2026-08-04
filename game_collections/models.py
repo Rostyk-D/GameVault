@@ -1,10 +1,30 @@
 from django.conf import settings
 from django.db import models
 
+from core.slugs import create_unique_slug
 from games.models import Game
 
 
+class GameCollectionQuerySet(models.QuerySet):
+    def with_statistics(self):
+        return self.annotate(
+            likes=models.Count(
+                "collection_votes",
+                filter=models.Q(collection_votes__value=CollectionVote.LIKE),
+                distinct=True,
+            ),
+            dislikes=models.Count(
+                "collection_votes",
+                filter=models.Q(collection_votes__value=CollectionVote.DISLIKE),
+                distinct=True,
+            ),
+            games_count=models.Count("collection_games", distinct=True),
+        ).annotate(reputation=models.F("likes") - models.F("dislikes"))
+
+
 class GameCollection(models.Model):
+    objects = GameCollectionQuerySet.as_manager()
+
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -13,6 +33,12 @@ class GameCollection(models.Model):
 
     title = models.CharField(
         max_length=100,
+    )
+
+    slug = models.SlugField(
+        max_length=120,
+        unique=True,
+        blank=True,
     )
 
     description = models.TextField(
@@ -48,6 +74,17 @@ class GameCollection(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = create_unique_slug(
+                self,
+                self.title,
+                fallback="collection",
+                reserved_slugs=("create",),
+            )
+
+        super().save(*args, **kwargs)
 
 
 class CollectionGame(models.Model):

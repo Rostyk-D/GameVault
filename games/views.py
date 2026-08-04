@@ -60,6 +60,8 @@ class GameDetailView(generic.DetailView):
     model = Game
     template_name = "games/game_detail.html"
     context_object_name = "game"
+    slug_field = "slug"
+    slug_url_kwarg = "slug"
 
     def get_queryset(self):
         return (
@@ -92,7 +94,7 @@ class GameDetailView(generic.DetailView):
 
         return redirect(
             "games:game-detail",
-            pk=self.object.pk
+            slug=self.object.slug,
         )
 
     def get_context_data(self, **kwargs):
@@ -239,7 +241,7 @@ class GameCommentCreateUpdateView(
         return reverse_lazy(
             "games:game-detail",
             kwargs={
-                "pk": self.kwargs["pk"]
+                "slug": self.object.game.slug
             }
         )
 
@@ -277,5 +279,5 @@ class CommentVoteView(
 
         return redirect(
             "games:game-detail",
-            pk=comment.game.pk
+            slug=comment.game.slug
         )

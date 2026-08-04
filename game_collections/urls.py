@@ -23,19 +23,19 @@ urlpatterns = [
     ),
 
     path(
-        "<int:pk>/",
+        "<slug:slug>/",
         views.GameCollectionDetailView.as_view(),
         name="detail",
     ),
 
     path(
-        "<int:pk>/update/",
+        "<slug:slug>/update/",
         views.GameCollectionUpdateView.as_view(),
         name="update",
     ),
 
     path(
-        "<int:pk>/delete/",
+        "<slug:slug>/delete/",
         views.GameCollectionDeleteView.as_view(),
         name="delete",
     ),

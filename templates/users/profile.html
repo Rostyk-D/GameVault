@@ -108,7 +108,7 @@
         {% if collections %}
           <div class="collections-grid">
             {% for collection in collections %}
-              <a href="{% url 'game_collections:detail' collection.pk %}"
+              <a href="{% url 'game_collections:detail' collection.slug %}"
                  class="collection-card-link">
 
                 <article class="collection-card">
@@ -187,7 +187,7 @@
         </form>
         <div class="games-grid">
           {% for item in steam_library_page %}
-            <a href="{% url 'games:game-detail' item.game.pk %}" class="game-card">
+            <a href="{% url 'games:game-detail' item.game.slug %}" class="game-card">
               <div class="game-cover">
                 {% if item.game.cover %}
                   <img src="{{ item.game.cover }}" alt="{{ item.game.title }}">

@@ -24,7 +24,7 @@
     {% for game in games %}
 
       <a
-          href="{% url 'games:game-detail' game.pk %}"
+          href="{% url 'games:game-detail' game.slug %}"
           class="game-card"
       >
 

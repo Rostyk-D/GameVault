@@ -27,7 +27,7 @@
     </form>
     <div class="collections-grid">
       {% for collection in collections %}
-        <a href="{% url 'game_collections:detail' collection.pk %}"
+        <a href="{% url 'game_collections:detail' collection.slug %}"
            class="collection-card-link">
           <article class="collection-card">
             <div class="collection-header">

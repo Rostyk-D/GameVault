@@ -11,6 +11,31 @@ from games.models import Game
 
 
 class GameCollectionListQueryTests(TestCase):
+    def test_collections_receive_unique_slugs_and_use_them_in_urls(self):
+        user = get_user_model().objects.create_user(
+            username="owner",
+            password="password",
+        )
+        first = GameCollection.objects.create(owner=user, title="My list")
+        second = GameCollection.objects.create(owner=user, title="My list")
+
+        self.assertEqual(first.slug, "my-list")
+        self.assertEqual(second.slug, "my-list-1")
+        response = self.client.get(
+            reverse("game_collections:detail", kwargs={"slug": first.slug})
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_collection_slug_does_not_conflict_with_create_route(self):
+        user = get_user_model().objects.create_user(
+            username="owner",
+            password="password",
+        )
+
+        collection = GameCollection.objects.create(owner=user, title="Create")
+
+        self.assertEqual(collection.slug, "create-1")
+
     def test_list_exposes_annotated_game_count(self):
         user = get_user_model().objects.create_user(
             username="owner",

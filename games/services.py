@@ -2,7 +2,6 @@ import requests
 from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.utils import timezone
-from django.utils.text import slugify
 
 from games.models import (
     Game,
@@ -173,13 +172,6 @@ class SteamService:
                 "score": 0,
             }
 
-    @staticmethod
-    def create_slug(
-        title,
-        appid,
-    ):
-        return f"{slugify(title)}-{appid}"
-
     @classmethod
     async def sync_library(
         cls,
@@ -277,10 +269,6 @@ class SteamService:
                     steam_appid=appid,
                     defaults={
                         "title": title,
-                        "slug": cls.create_slug(
-                            title,
-                            appid,
-                        ),
                     },
                 )
 

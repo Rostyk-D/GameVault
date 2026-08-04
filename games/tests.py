@@ -45,7 +45,7 @@ class GameDetailQueryTests(TestCase):
         # The number is independent of the number of comments on the page.
         with self.assertNumQueries(9):
             response = self.client.get(
-                reverse("games:game-detail", kwargs={"pk": self.game.pk})
+                reverse("games:game-detail", kwargs={"slug": self.game.slug})
             )
 
         self.assertEqual(response.status_code, 200)
@@ -70,7 +70,7 @@ class GameDetailQueryTests(TestCase):
 
         self.assertRedirects(
             response,
-            reverse("games:game-detail", kwargs={"pk": self.game.pk}),
+            reverse("games:game-detail", kwargs={"slug": self.game.slug}),
         )
         self.assertFalse(
             CollectionGame.objects.filter(
@@ -87,6 +87,24 @@ class GameModelTests(TestCase):
 
         self.assertEqual(first.slug, "a-game")
         self.assertEqual(second.slug, "a-game-1")
+
+    def test_slug_has_fallback_and_respects_maximum_length(self):
+        game = Game.objects.create(title="🎮" * 200)
+
+        self.assertEqual(game.slug, "game")
+        self.assertLessEqual(
+            len(game.slug),
+            Game._meta.get_field("slug").max_length,
+        )
+
+    def test_game_detail_uses_slug_url(self):
+        game = Game.objects.create(title="Slug game")
+
+        response = self.client.get(
+            reverse("games:game-detail", kwargs={"slug": game.slug})
+        )
+
+        self.assertEqual(response.status_code, 200)
 
 
 class SteamServiceTests(TestCase):

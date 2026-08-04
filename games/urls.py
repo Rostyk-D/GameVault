@@ -17,7 +17,7 @@ urlpatterns = [
     ),
 
     path(
-        "<int:pk>/",
+        "<slug:slug>/",
         GameDetailView.as_view(),
         name="game-detail",
     ),

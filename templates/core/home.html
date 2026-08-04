@@ -38,7 +38,7 @@
     <div class="row g-4">
       {% for collection in featured_collections %}
         <div class="col-lg-4 col-md-6">
-          <a href="{% url 'game_collections:detail' collection.pk %}" class="home-card-link">
+          <a href="{% url 'game_collections:detail' collection.slug %}" class="home-card-link">
             <div class="home-card">
               <h4>
                 {{ collection.title }}
@@ -71,7 +71,7 @@
     <div class="row g-4">
       {% for collection in latest_collections %}
         <div class="col-lg-4 col-md-6">
-          <a href="{% url 'game_collections:detail' collection.pk %}" class="home-card-link">
+          <a href="{% url 'game_collections:detail' collection.slug %}" class="home-card-link">
             <div class="home-card">
               <h4>
                 {{ collection.title }}
@@ -104,7 +104,7 @@
     <div class="row g-4 most-used-games-grid">
       {% for game in most_used_games %}
         <div class="col-lg-4 col-md-6">
-          <a href="{% url 'games:game-detail' game.id %}" class="home-card-link">
+          <a href="{% url 'games:game-detail' game.slug %}" class="home-card-link">
             <div class="home-card game-home-card">
               {% if game.cover %}
                 <img src="{{ game.cover }}" alt="{{ game.title }}" class="game-cover">

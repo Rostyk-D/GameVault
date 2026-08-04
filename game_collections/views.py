@@ -33,20 +33,7 @@ class GameCollectionListView(generic.ListView):
         queryset = (
             GameCollection.objects
             .filter(is_public=True)
-            .annotate(
-                likes=Count(
-                    "collection_votes",
-                    filter=Q(collection_votes__value=CollectionVote.LIKE),
-                    distinct=True,
-                ),
-                dislikes=Count(
-                    "collection_votes",
-                    filter=Q(collection_votes__value=CollectionVote.DISLIKE),
-                    distinct=True,
-                ),
-                games_count=Count("collection_games", distinct=True),
-            )
-            .annotate(reputation=F("likes") - F("dislikes"))
+            .with_statistics()
             .select_related(
                 "owner"
             )
@@ -82,6 +69,8 @@ class GameCollectionDetailView(generic.DetailView):
     model = GameCollection
     template_name = "game_collections/collection_detail.html"
     context_object_name = "collection"
+    slug_field = "slug"
+    slug_url_kwarg = "slug"
 
     def get_queryset(self):
         user = self.request.user
@@ -245,7 +234,7 @@ class GameCollectionCreateView(
         return reverse_lazy(
             "game_collections:detail",
             kwargs={
-                "pk": self.object.pk
+                "slug": self.object.slug,
             }
         )
 
@@ -258,6 +247,8 @@ class GameCollectionUpdateView(
     model = GameCollection
     form_class = GameCollectionForm
     template_name = "game_collections/collection_form.html"
+    slug_field = "slug"
+    slug_url_kwarg = "slug"
 
     def test_func(self):
         return (
@@ -269,7 +260,7 @@ class GameCollectionUpdateView(
         return reverse_lazy(
             "game_collections:detail",
             kwargs={
-                "pk": self.object.pk
+                "slug": self.object.slug
             }
         )
 
@@ -281,6 +272,9 @@ class GameCollectionDeleteView(
 ):
     model = GameCollection
     template_name = "game_collections/collection_confirm_delete.html"
+    context_object_name = "collection"
+    slug_field = "slug"
+    slug_url_kwarg = "slug"
 
     def test_func(self):
         return (
@@ -337,7 +331,7 @@ class AddGameFromGamePageView(
 
         return redirect(
             "games:game-detail",
-            pk=game.pk,
+            slug=game.slug,
         )
 
 
@@ -365,7 +359,7 @@ class RemoveGameFromCollectionView( # 1
 
         return redirect(
             "game_collections:detail",
-            pk=collection.pk,
+            slug=collection.slug,
         )
 
 
@@ -402,7 +396,7 @@ class RecommendationVoteView(
 
         return redirect(
             "game_collections:detail",
-            pk=collection_game.collection.pk,
+            slug=collection_game.collection.slug,
         )
 
 
@@ -439,5 +433,5 @@ class CollectionVoteView(
 
         return redirect(
             "game_collections:detail",
-            pk=pk,
+            slug=collection.slug,
         )

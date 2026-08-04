@@ -317,6 +317,16 @@ class AddGameFromGamePageView(
             owner=request.user,
         )
 
+        # Keep the game's membership in the owner's collections equal to the
+        # submitted checkbox selection. This also lets users remove a game by
+        # unchecking a collection where it was already present.
+        CollectionGame.objects.filter(
+            collection__owner=request.user,
+            game=game,
+        ).exclude(
+            collection__in=collections,
+        ).delete()
+
         CollectionGame.objects.bulk_create(
             [
                 CollectionGame(collection=collection, game=game)
@@ -331,7 +341,7 @@ class AddGameFromGamePageView(
         )
 
 
-class RemoveGameFromCollectionView(
+class RemoveGameFromCollectionView( # 1
     LoginRequiredMixin,
     generic.View,
 ):

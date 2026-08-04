@@ -101,12 +101,12 @@
 
               <div class="collection-checkboxes">
                 {% for collection in user_collections %}
-                  <label class="collection-check {% if collection.has_game %}disabled{% endif %}">
+                  <label class="collection-check">
                     <input
                         type="checkbox"
                         name="collections"
                         value="{{ collection.id }}"
-                        {% if collection.has_game %}checked disabled{% endif %}>
+                        {% if collection.has_game %}checked{% endif %}>
 
                     <span>
                     {{ collection.title }}
@@ -128,7 +128,7 @@
               <button
                   type="submit"
                   class="btn btn-primary mt-3">
-                Add
+                Save collection changes
               </button>
             </form>
           </div>

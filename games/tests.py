@@ -53,3 +53,25 @@ class GameDetailQueryTests(TestCase):
                 for comment in response.context["comments"]
             )
         )
+
+    def test_collection_selection_removes_unchecked_game_membership(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse(
+                "game_collections:add-game-from-page",
+                kwargs={"game_id": self.game.pk},
+            ),
+            {"collections": []},
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("games:game-detail", kwargs={"pk": self.game.pk}),
+        )
+        self.assertFalse(
+            CollectionGame.objects.filter(
+                collection__owner=self.user,
+                game=self.game,
+            ).exists()
+        )

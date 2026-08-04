@@ -94,7 +94,7 @@
             </a>
           {% endif %}
           {% if request.user == profile_user %}
-            <a href="{% url "users:profile-delete" profile_user.pk %}" class="btn btn-primary mt-3">
+            <a href="{% url "users:profile-delete" profile_user.pk %}" class="btn btn-outline-danger mt-3">
               Delete Profile
             </a>
           {% endif %}

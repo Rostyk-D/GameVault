@@ -116,6 +116,10 @@
     margin: 0 1.25rem 1.25rem;
 }
 
+.most-used-games-grid {
+    justify-content: center;
+}
+
 .leaderboard {
     background: var(--bg-card);
     border: 1px solid var(--border-color);

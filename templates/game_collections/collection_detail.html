@@ -1,11 +1,14 @@
 {% extends "base/base.html" %}
 {% load static %}
+
 {% block title %}
   {{ collection.title }} | GameVault
 {% endblock %}
+
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/collections_detail.css' %}">
 {% endblock %}
+
 {% block content %}
   <div class="collection-detail">
     <div class="collection-card mb-4">
@@ -14,15 +17,15 @@
         {{ collection.description }}
       </p>
       <div class="collection-meta">
+      <span>
+        👤
+        <a href="{% url 'users:profile' collection.owner.pk %}">
+          {{ collection.owner.username }}
+        </a>
+      </span>
         <span>
-          👤
-          <a href="{% url 'users:profile' collection.owner.pk %}">
-            {{ collection.owner.username }}
-          </a>
-        </span>
-        <span>
-          🎮 {{ collection.games_count }}
-        </span>
+        🎮 {{ collection.games_count }}
+      </span>
       </div>
       {% if user.is_authenticated %}
         <div class="vote-buttons mt-3">
@@ -41,43 +44,50 @@
         </div>
       {% endif %}
     </div>
+
     <div class="collection-header">
       <h2 class="section-title">
         🎮 Games
       </h2>
+
       <div class="collection-actions">
+        <a href="{% url 'game_collections:list' %}" class="btn btn-primary">
+          Back to collections
+        </a>
+
         {% if user == collection.owner %}
           <a href="{% url 'games:game-list' %}" class="btn btn-success">
             Add game from catalog
           </a>
+
+          <a href="{% url 'game_collections:delete' collection.pk %}" class="btn btn-outline-danger">
+            Delete collection
+          </a>
         {% endif %}
-        <a href="{% url 'game_collections:list' %}" class="btn btn-primary">
-          Back to collections
-        </a>
       </div>
     </div>
+
     <form method="get" class="mb-4">
-
       {{ search_form.query }}
-
       <button class="btn btn-primary">
         Search games
       </button>
-
     </form>
+
     <div class="collection-games">
       {% for item in collection_games %}
         <div class="collection-game-card">
-          <a
-              href="{% url 'games:game-detail' item.game.pk %}"
-              class="collection-game-link">
+
+          <a href="{% url 'games:game-detail' item.game.pk %}" class="collection-game-link">
             <img
                 src="{{ item.game.cover|default:'/static/images/default-game.png' }}"
                 alt="{{ item.game.title }}">
+
             <div class="collection-game-body">
               <h4>
                 {{ item.game.title }}
               </h4>
+
               {% if item.relevance_score > 0 %}
                 <div class="game-relevance relevance-positive">
                   🔥 Relevance: +{{ item.relevance_score }}
@@ -91,12 +101,14 @@
                   📌 Relevance: 0
                 </div>
               {% endif %}
+
               {% if item.game.steam_review_score %}
                 <p>
                   ⭐ Steam rating:
                   <strong>{{ item.game.steam_review_score }}%</strong>
                 </p>
               {% endif %}
+
               <p>
                 👍 Helpful:
                 <strong>{{ item.helpful_count }}</strong>
@@ -104,6 +116,7 @@
                 👎 Not helpful:
                 <strong>{{ item.not_helpful_count }}</strong>
               </p>
+
               {% if item.recommendation %}
                 <p class="recommendation-text">
                   "{{ item.recommendation }}"
@@ -111,33 +124,57 @@
               {% endif %}
             </div>
           </a>
+
           {% if user.is_authenticated %}
-            <div class="helpful-buttons">
-              <form method="post" action="{% url 'game_collections:recommendation-vote' item.pk 1 %}">
-                {% csrf_token %}
-                <button
-                    type="submit"
-                    class="btn btn-sm btn-outline-success {% if item.user_vote == 1 %}active-vote{% endif %}">
-                  👍 Helpful
-                </button>
-              </form>
-              <form method="post" action="{% url 'game_collections:recommendation-vote' item.pk -1 %}">
-                {% csrf_token %}
-                <button
-                    type="submit"
-                    class="btn btn-sm btn-outline-danger {% if item.user_vote == -1 %}active-vote{% endif %}">
-                  👎 Not helpful
-                </button>
-              </form>
+            <div class="game-actions">
+
+              <div class="helpful-buttons">
+                <form method="post" action="{% url 'game_collections:recommendation-vote' item.pk 1 %}">
+                  {% csrf_token %}
+                  <button
+                      type="submit"
+                      class="btn btn-sm btn-outline-success {% if item.user_vote == 1 %}active-vote{% endif %}">
+                    👍 Helpful
+                  </button>
+                </form>
+
+                <form method="post" action="{% url 'game_collections:recommendation-vote' item.pk -1 %}">
+                  {% csrf_token %}
+                  <button
+                      type="submit"
+                      class="btn btn-sm btn-outline-danger {% if item.user_vote == -1 %}active-vote{% endif %}">
+                    👎 Not helpful
+                  </button>
+                </form>
+              </div>
+
+              {% if user == collection.owner %}
+                <form
+                    method="post"
+                    action="{% url 'game_collections:remove-game' collection.pk item.game.pk %}"
+                    class="remove-game-form">
+                  {% csrf_token %}
+                  <button
+                      type="submit"
+                      class="btn btn-outline-danger remove-game-btn"
+                      title="Remove game">
+                    🗑
+                  </button>
+                </form>
+              {% endif %}
+
             </div>
           {% endif %}
+
         </div>
+
       {% empty %}
         <p class="empty-text">
           No games in collection.
         </p>
       {% endfor %}
     </div>
+
     {% include "includes/pagination.html" %}
   </div>
 {% endblock %}

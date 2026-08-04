@@ -194,11 +194,6 @@
     color: var(--text-secondary);
 }
 
-.collection-check.disabled {
-    opacity: .55;
-    cursor: not-allowed;
-}
-
 .game-comments {
     margin-top: 3rem;
     padding-top: 2rem;

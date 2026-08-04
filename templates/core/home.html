@@ -101,9 +101,9 @@
     <h2 class="section-title">
       🎮 Most Used Games
     </h2>
-    <div class="row g-4">
+    <div class="row g-4 most-used-games-grid">
       {% for game in most_used_games %}
-        <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="col-lg-4 col-md-6">
           <a href="{% url 'games:game-detail' game.id %}" class="home-card-link">
             <div class="home-card game-home-card">
               {% if game.cover %}

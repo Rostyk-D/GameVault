@@ -7,6 +7,7 @@ from users.views import (
     ProfileUpdateView,
     GameAutocomplete,
     UpdateSteamLibraryView,
+    ProfileDeleteView,
 )
 
 app_name = "users"
@@ -32,6 +33,11 @@ urlpatterns = [
         "profile/<int:pk>/edit/",
         ProfileUpdateView.as_view(),
         name="profile-edit",
+    ),
+    path(
+        "profile/<int:pk>/delete/",
+        ProfileDeleteView.as_view(),
+        name="profile-delete"
     ),
 
     path(

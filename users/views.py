@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from dal import autocomplete
 from django.contrib import messages
-from django.contrib.auth import views
+from django.contrib.auth import views, logout
 from django.contrib.auth.mixins import (
     LoginRequiredMixin,
     UserPassesTestMixin,
@@ -241,6 +241,23 @@ class ProfileUpdateView(
                 daemon=True,
             ).start()
         return response
+
+
+class ProfileDeleteView(
+    LoginRequiredMixin,
+    UserPassesTestMixin,
+    generic.DeleteView
+):
+    model = User
+    template_name = "users/profile_confirm_delete.html"
+    success_url = reverse_lazy("core:home")
+
+    def test_func(self):
+        return self.request.user == self.get_object()
+
+    def form_valid(self, form):
+        logout(self.request)
+        return super().form_valid(form)
 
 
 class UpdateSteamLibraryView(

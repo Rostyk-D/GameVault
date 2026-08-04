@@ -47,14 +47,6 @@ def sync_library_background(user_id):
                 user
             )
         )
-        user.steam_sync_status = "completed"
-        user.steam_last_sync = timezone.now()
-        user.save(
-            update_fields=[
-                "steam_sync_status",
-                "steam_last_sync",
-            ]
-        )
     except Exception:
         user.steam_sync_status = "error"
         user.save(

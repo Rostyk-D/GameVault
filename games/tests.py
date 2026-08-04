@@ -1,9 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+import requests
+from unittest.mock import Mock, patch
 
 from game_collections.models import CollectionGame, GameCollection
 from games.models import CommentVote, Game, GameComment, Genre
+from games.services import SteamService, SteamServiceError
 
 
 class GameDetailQueryTests(TestCase):
@@ -75,3 +78,37 @@ class GameDetailQueryTests(TestCase):
                 game=self.game,
             ).exists()
         )
+
+
+class GameModelTests(TestCase):
+    def test_duplicate_titles_receive_unique_slugs(self):
+        first = Game.objects.create(title="A Game")
+        second = Game.objects.create(title="A Game")
+
+        self.assertEqual(first.slug, "a-game")
+        self.assertEqual(second.slug, "a-game-1")
+
+
+class SteamServiceTests(TestCase):
+    @patch("games.services.requests.get")
+    def test_get_owned_games_uses_provided_steam_id(self, mock_get):
+        response = Mock()
+        response.json.return_value = {
+            "response": {"games": [{"appid": 10}]}
+        }
+        mock_get.return_value = response
+
+        games = SteamService.get_owned_games("76561198402195386")
+
+        self.assertEqual(games, [{"appid": 10}])
+        self.assertEqual(
+            mock_get.call_args.kwargs["params"]["steamid"],
+            "76561198402195386",
+        )
+
+    @patch("games.services.requests.get")
+    def test_get_owned_games_raises_on_unavailable_steam_api(self, mock_get):
+        mock_get.side_effect = requests.ConnectionError()
+
+        with self.assertRaises(SteamServiceError):
+            SteamService.get_owned_games("76561198402195386")

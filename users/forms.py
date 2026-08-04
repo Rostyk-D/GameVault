@@ -144,6 +144,21 @@ class UserProfileForm(forms.ModelForm):
         for field in self.fields.values():
             field.help_text = ""
 
+    def clean_steam_id(self):
+        steam_id = self.cleaned_data["steam_id"]
+
+        if not steam_id:
+            return None
+
+        steam_id = steam_id.strip()
+
+        if not re.fullmatch(r"\d{17}", steam_id):
+            raise forms.ValidationError(
+                "Enter a 17-digit Steam ID64."
+            )
+
+        return steam_id
+
 
 class SteamLibrarySearchForm(forms.Form):
     query = forms.CharField(

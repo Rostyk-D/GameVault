@@ -69,3 +69,46 @@ class GameCollectionListQueryTests(TestCase):
         result = response.context["collections"][0]
         self.assertEqual(result.dislikes, 1)
         self.assertEqual(result.reputation, -1)
+
+    def test_game_membership_sync_does_not_modify_other_users_collections(self):
+        owner = get_user_model().objects.create_user(
+            username="owner",
+            password="password",
+        )
+        other_user = get_user_model().objects.create_user(
+            username="other",
+            password="password",
+        )
+        game = Game.objects.create(title="Game")
+        owner_collection = GameCollection.objects.create(
+            owner=owner,
+            title="Owner list",
+        )
+        other_collection = GameCollection.objects.create(
+            owner=other_user,
+            title="Other list",
+        )
+        CollectionGame.objects.create(collection=owner_collection, game=game)
+        CollectionGame.objects.create(collection=other_collection, game=game)
+
+        self.client.force_login(owner)
+        self.client.post(
+            reverse(
+                "game_collections:add-game-from-page",
+                kwargs={"game_id": game.pk},
+            ),
+            {"collections": []},
+        )
+
+        self.assertFalse(
+            CollectionGame.objects.filter(
+                collection=owner_collection,
+                game=game,
+            ).exists()
+        )
+        self.assertTrue(
+            CollectionGame.objects.filter(
+                collection=other_collection,
+                game=game,
+            ).exists()
+        )

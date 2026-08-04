@@ -12,6 +12,10 @@ from games.models import (
 )
 
 
+class SteamServiceError(Exception):
+    """Steam API could not provide a reliable response."""
+
+
 class SteamService:
     IGNORED_APPIDS = [
         365670,
@@ -46,14 +50,18 @@ class SteamService:
                 timeout=15,
             )
 
+            response.raise_for_status()
+
             return (
                 response.json()
                 .get("response", {})
                 .get("games", [])
             )
 
-        except requests.RequestException:
-            return []
+        except (requests.RequestException, ValueError) as error:
+            raise SteamServiceError(
+                "Unable to load the Steam library."
+            ) from error
 
     @staticmethod
     def get_game_details(appid):
@@ -68,14 +76,18 @@ class SteamService:
                 timeout=15,
             )
 
+            response.raise_for_status()
+
             return (
                 response.json()
                 .get(str(appid), {})
                 .get("data")
             )
 
-        except requests.RequestException:
-            return None
+        except (requests.RequestException, ValueError) as error:
+            raise SteamServiceError(
+                f"Unable to load Steam details for app {appid}."
+            ) from error
 
     @staticmethod
     def get_cover(appid, details=None):

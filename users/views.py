@@ -9,6 +9,7 @@ from django.contrib.auth.mixins import (
     LoginRequiredMixin,
     UserPassesTestMixin,
 )
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -92,8 +93,25 @@ class ProfileDetailView(
 
     def get_object(self):
         return get_object_or_404(
-            User.objects.select_related("favorite_game"),
-            pk=self.kwargs["pk"]
+            User.objects.select_related("favorite_game").annotate(
+                reputation_score=
+                Count(
+                    "game_collections__collection_votes",
+                    filter=Q(
+                        game_collections__collection_votes__value=CollectionVote.LIKE
+                    ),
+                    distinct=True,
+                )
+                -
+                Count(
+                    "game_collections__collection_votes",
+                    filter=Q(
+                        game_collections__collection_votes__value=CollectionVote.DISLIKE
+                    ),
+                    distinct=True,
+                )
+            ),
+            pk=self.kwargs["pk"],
         )
 
     def get_context_data(
@@ -134,9 +152,9 @@ class ProfileDetailView(
         )
 
         collections = (
-        GameCollection.objects
-        .filter(owner=self.object)
-        .with_statistics()
+            GameCollection.objects
+            .filter(owner=self.object)
+            .with_statistics()
             .order_by("-created_at")
         )
 

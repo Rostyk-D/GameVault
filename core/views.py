@@ -3,7 +3,7 @@ from django.shortcuts import render
 
 from users.models import User
 from games.models import Game
-from game_collections.models import GameCollection
+from game_collections.models import GameCollection, CollectionVote
 
 
 def home(request):
@@ -41,29 +41,7 @@ def home(request):
         )[:3]
     )
 
-    top_users = (
-        User.objects
-        .annotate(
-            best_collection_rating=Count(
-                "game_collections__collection_votes",
-                filter=Q(
-                    game_collections__collection_votes__value=1
-                ),
-                distinct=True,
-            )
-            -
-            Count(
-                "game_collections__collection_votes",
-                filter=Q(
-                    game_collections__collection_votes__value=-1
-                ),
-                distinct=True,
-            )
-        )
-        .order_by(
-            "-best_collection_rating"
-        )[:3]
-    )
+    top_users = User.objects.order_by("-reputation")[:3]
 
     context = {
         "featured_collections": featured_collections,

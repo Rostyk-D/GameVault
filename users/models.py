@@ -75,6 +75,6 @@ class User(AbstractUser):
         default=0
     )
 
-    reputation = models.PositiveIntegerField(
+    reputation = models.IntegerField(
         default=0,
     )

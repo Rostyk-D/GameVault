@@ -23,6 +23,22 @@ from game_collections.models import (
 )
 
 
+def update_user_reputation(user):
+    user.reputation = (
+        CollectionVote.objects.filter(
+            collection__owner=user,
+            value=CollectionVote.LIKE,
+        ).count()
+        -
+        CollectionVote.objects.filter(
+            collection__owner=user,
+            value=CollectionVote.DISLIKE,
+        ).count()
+    )
+
+    user.save(update_fields=["reputation"])
+
+
 class GameCollectionListView(generic.ListView):
     model = GameCollection
     template_name = "game_collections/collection_list.html"
@@ -277,15 +293,20 @@ class GameCollectionDeleteView(
     slug_url_kwarg = "slug"
 
     def test_func(self):
-        return (
-                self.request.user ==
-                self.get_object().owner
-        )
+        return self.request.user == self.get_object().owner
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        owner = self.object.owner
+
+        response = super().delete(request, *args, **kwargs)
+
+        update_user_reputation(owner)
+
+        return response
 
     def get_success_url(self):
-        return reverse_lazy(
-            "game_collections:list"
-        )
+        return reverse_lazy("game_collections:list")
 
 
 class AddGameFromGamePageView(
@@ -430,6 +451,8 @@ class CollectionVoteView(
             else:
                 vote.value = value
                 vote.save()
+
+        update_user_reputation(collection.owner)
 
         return redirect(
             "game_collections:detail",

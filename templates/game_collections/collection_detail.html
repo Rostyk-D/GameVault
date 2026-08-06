@@ -88,7 +88,7 @@
 
           <a href="{% url 'games:game-detail' item.game.slug %}" class="collection-game-link">
             <img
-                src="{{ item.game.cover|default:'/static/images/default-game.png' }}"
+                src="{{ item.game.cover|default:'/static/images/default-game.svg' }}"
                 alt="{{ item.game.title }}">
 
             <div class="collection-game-body">

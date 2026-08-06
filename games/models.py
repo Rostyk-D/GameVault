@@ -164,6 +164,7 @@ class GameComment(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.game.title}"
 
+
 class CommentVote(models.Model):
     LIKE = 1
     DISLIKE = -1

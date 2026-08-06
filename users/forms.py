@@ -9,6 +9,7 @@ from games.models import Game
 
 User = get_user_model()
 
+
 class UserLoginForm(AuthenticationForm):
     username = forms.CharField(
         widget=forms.TextInput(

@@ -1,0 +1,45 @@
+.pagination {
+    gap: .5rem;
+}
+
+.pagination .page-item .page-link {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    border-radius: .75rem;
+    padding: .6rem 1rem;
+    font-weight: 600;
+    transition: .2s;
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: var(--bg-card);
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+}
+
+@media (max-width: 576px) {
+
+    .pagination {
+        gap: .25rem;
+    }
+
+    .pagination .page-item .page-link {
+        padding: .45rem .7rem;
+        font-size: .9rem;
+    }
+
+}

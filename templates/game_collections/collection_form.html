@@ -1,0 +1,119 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}
+  {% if is_update %}
+    Update Collection | GameVault
+  {% else %}
+    Create Collection | GameVault
+  {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/collection_form.css' %}">
+{% endblock %}
+
+{% block content %}
+
+  <div class="collection-form-page">
+
+    <div class="collection-form-card">
+
+      {% if is_update %}
+        <h1>
+          🎮 Update Collection
+        </h1>
+      {% else %}
+        <h1>
+          🎮 Create Collection
+        </h1>
+      {% endif %}
+
+
+      {% if is_update %}
+        <p class="text-secondary mb-4">
+          Update your own game collection and share your recommendations.
+        </p>
+      {% else %}
+        <p class="text-secondary mb-4">
+          Create your own game collection and share your recommendations.
+        </p>
+      {% endif %}
+
+      <form method="post">
+
+        {% csrf_token %}
+
+        {% for field in form %}
+
+          {% if field.name == "is_public" %}
+
+            <div class="checkbox-field">
+
+              {{ field }}
+
+              <label for="{{ field.id_for_label }}">
+                {{ field.label }}
+              </label>
+
+            </div>
+
+          {% else %}
+
+            <div class="form-group">
+
+              <label for="{{ field.id_for_label }}">
+                {{ field.label }}
+              </label>
+
+              {{ field }}
+
+              {% if field.help_text %}
+                <small class="text-secondary">
+                  {{ field.help_text }}
+                </small>
+              {% endif %}
+
+              {% for error in field.errors %}
+                <div class="text-danger small mt-1">
+                  {{ error }}
+                </div>
+              {% endfor %}
+
+            </div>
+
+          {% endif %}
+
+        {% endfor %}
+
+
+        <div class="collection-form-actions">
+
+          <button
+              type="submit"
+              class="collection-save-button"
+          >
+            {% if is_update %}
+              Update Collection
+            {% else %}
+              Save Collection
+            {% endif %}
+          </button>
+
+
+          <a
+              href="{% url 'game_collections:list' %}"
+              class="collection-cancel-button"
+          >
+            Cancel
+          </a>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+{% endblock %}

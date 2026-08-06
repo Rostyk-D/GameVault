@@ -1,9 +1,9 @@
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.shortcuts import render
 
 from users.models import User
 from games.models import Game
-from game_collections.models import GameCollection, CollectionVote
+from game_collections.models import GameCollection
 
 
 def home(request):

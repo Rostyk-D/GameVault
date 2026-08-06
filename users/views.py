@@ -94,21 +94,26 @@ class ProfileDetailView(
     def get_object(self):
         return get_object_or_404(
             User.objects.select_related("favorite_game").annotate(
-                reputation_score=
-                Count(
-                    "game_collections__collection_votes",
-                    filter=Q(
-                        game_collections__collection_votes__value=CollectionVote.LIKE
-                    ),
-                    distinct=True,
-                )
-                -
-                Count(
-                    "game_collections__collection_votes",
-                    filter=Q(
-                        game_collections__collection_votes__value=CollectionVote.DISLIKE
-                    ),
-                    distinct=True,
+                reputation_score=(
+                        Count(
+                            "game_collections__collection_votes",
+                            filter=Q(
+                                game_collections__collection_votes__value=(
+                                    CollectionVote.LIKE
+                                ),
+                            ),
+                            distinct=True,
+                        )
+                        -
+                        Count(
+                            "game_collections__collection_votes",
+                            filter=Q(
+                                game_collections__collection_votes__value=(
+                                    CollectionVote.DISLIKE
+                                ),
+                            ),
+                            distinct=True,
+                        )
                 )
             ),
             pk=self.kwargs["pk"],

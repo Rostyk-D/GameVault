@@ -15,6 +15,7 @@ class GameSearchForm(forms.Form):
         ),
     )
 
+
 class GameCommentForm(forms.ModelForm):
 
     class Meta:

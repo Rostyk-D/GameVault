@@ -101,7 +101,10 @@ class SteamService:
                 covers.append(image)
 
         covers.append(
-            f"https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/{appid}/header.jpg"
+            (
+                "https://shared.fastly.steamstatic.com/"
+                f"store_item_assets/steam/apps/{appid}/header.jpg"
+            )
         )
 
         for cover in covers:

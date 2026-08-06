@@ -241,6 +241,11 @@ class GameCollectionCreateView(
     form_class = GameCollectionForm
     template_name = "game_collections/collection_form.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["is_update"] = False
+        return context
+
     def form_valid(self, form):
         form.instance.owner = self.request.user
 
@@ -265,6 +270,11 @@ class GameCollectionUpdateView(
     template_name = "game_collections/collection_form.html"
     slug_field = "slug"
     slug_url_kwarg = "slug"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["is_update"] = True
+        return context
 
     def test_func(self):
         return (

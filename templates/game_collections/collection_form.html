@@ -2,7 +2,11 @@
 {% load static %}
 
 {% block title %}
-  Create Collection | GameVault
+  {% if is_update %}
+    Update Collection | GameVault
+  {% else %}
+    Create Collection | GameVault
+  {% endif %}
 {% endblock %}
 
 {% block extra_css %}
@@ -15,13 +19,26 @@
 
     <div class="collection-form-card">
 
-      <h1>
-        🎮 Create Collection
-      </h1>
+      {% if is_update %}
+        <h1>
+          🎮 Update Collection
+        </h1>
+      {% else %}
+        <h1>
+          🎮 Create Collection
+        </h1>
+      {% endif %}
 
-      <p class="text-secondary mb-4">
-        Create your own game collection and share your recommendations.
-      </p>
+
+      {% if is_update %}
+        <p class="text-secondary mb-4">
+          Update your own game collection and share your recommendations.
+        </p>
+      {% else %}
+        <p class="text-secondary mb-4">
+          Create your own game collection and share your recommendations.
+        </p>
+      {% endif %}
 
       <form method="post">
 
@@ -76,7 +93,11 @@
               type="submit"
               class="collection-save-button"
           >
-            Save Collection
+            {% if is_update %}
+              Update Collection
+            {% else %}
+              Save Collection
+            {% endif %}
           </button>
 
 

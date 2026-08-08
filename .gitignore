@@ -1,10 +1,66 @@
-.idea/
-db.sqlite3
-.env
-env
+# Python
 
-# Python cache
-__pycache__/
-__pycache__
+**pycache**/
 *.py[cod]
 *$py.class
+*.so
+
+# Virtual environment
+
+.venv/
+venv/
+env/
+ENV/
+
+# Django
+
+*.log
+*.pot
+*.mo
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Testing / coverage
+
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+.hypothesis/
+coverage.xml
+nosetests.xml
+
+# Environment variables
+
+.env
+
+# IDE - PyCharm / JetBrains
+
+.idea/
+
+# Build / distribution
+
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Jupyter
+
+.ipynb_checkpoints/
+
+# Type checkers / linters
+
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+
+# OS
+
+.DS_Store
+Thumbs.db

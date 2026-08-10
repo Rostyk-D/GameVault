@@ -4,6 +4,7 @@ Pillow
 django-autocomplete-light
 requests
 python-dotenv
+psycopg2-binary
 
 # For corect style code
 flake8
@@ -12,5 +13,6 @@ flake8
 django-environ
 
 # Styles
+whitenoise
 django-crispy-forms
 crispy-bootstrap5

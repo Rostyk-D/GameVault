@@ -6,7 +6,10 @@ requests
 python-dotenv
 psycopg2-binary
 
-# For corect style code
+# Production server
+gunicorn
+
+# For correct style code
 flake8
 
 # Secret keys
